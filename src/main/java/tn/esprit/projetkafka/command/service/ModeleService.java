@@ -23,11 +23,9 @@ public class ModeleService {
 
     public Modele updateModele(Long id, Modele updatedModele) {
         return repository.findById(id).map(existingModele -> {
-            // Exemple de mise à jour, à adapter selon les champs importants
             existingModele.setName(updatedModele.getName());
             existingModele.setDescription(updatedModele.getDescription());
             existingModele.setAttributes(updatedModele.getAttributes());
-
             Modele saved = repository.save(existingModele);
             eventProducer.sendModeleEvent(saved);
             return saved;

@@ -1,5 +1,6 @@
 package tn.esprit.projetkafka.command.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,17 +17,18 @@ public class Modele {
 
     private String description;
 
+
     @ElementCollection
-    @CollectionTable(
-            name = "modele_attributes",
-            joinColumns = @JoinColumn(name = "modele_id")
-    )
+    @MapKeyColumn(name = "attribute_key")
+    @Column(name = "attribute_value")
+    @CollectionTable(name = "modele_attributes", joinColumns = @JoinColumn(name = "modele_id"))
 //    @MapKeyColumn(name = "attribute_key")
 //    @Column(name = "attribute_value")
     private Map<String, String> attributes = new HashMap<>();
 
 
     @OneToMany(mappedBy = "modele")
+    @JsonIgnore
     private List<Box> boxes;
     // Getters and Setters
 

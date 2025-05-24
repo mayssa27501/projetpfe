@@ -18,41 +18,28 @@ public class BoxEventConsumer {
 
     @KafkaListener(topics = "box-events", groupId = "box-group")
     public void consumeBoxEvent(Box box) {
+        if ("DELETE".equalsIgnoreCase(box.getEventType())) {
+            queryRepository.deleteById(box.getId());
+            return;
+        }
+
         BoxView boxView = new BoxView();
         boxView.setId(box.getId());
         boxView.setCode(box.getCode());
         boxView.setSerialNumber(box.getSerialNumber());
         boxView.setDescription(box.getDescription());
-        boxView.setCommunicationDate(box.getCommunicationDate());
-        boxView.setCommunicationHour(box.getCommunicationHour());
-        boxView.setFirmwareVersion(box.getFirmwareVersion());
-        boxView.setInstallationDate(box.getInstallationDate());
-        boxView.setMeasurePeriod(box.getMeasurePeriod());
-        boxView.setSensorPeriod(box.getSensorPeriod());
-        boxView.setOutputPeriod(box.getOutputPeriod());
-        boxView.setCommandPeriod(box.getCommandPeriod());
-        boxView.setPanneVerificationPeriod(box.getPanneVerificationPeriod());
-        boxView.setEnPanne(box.isEnPanne());
-        boxView.setPanneAlert(box.isPanneAlert());
-        boxView.setEmailAlert(box.isEmailAlert());
-        boxView.setNotificationAlert(box.isNotificationAlert());
-//        boxView.setLightingType(box.getLightingType());
-//        boxView.setActionneurCommandType(box.getActionneurCommandType());
-//        boxView.setEclairageCommandType(box.getEclairageCommandType());
-        boxView.setSimNumber(box.getSimNumber());
         boxView.setIsBlocked(box.getIsBlocked());
-        boxView.setPositionGps(box.getPositionGps());
-        boxView.setServerAdress(box.getServerAdress());
-        boxView.setServerPort(box.getServerPort());
-        boxView.setPS(box.getPS());
-        boxView.setPA(box.getPA());
-        boxView.setPC(box.getPC());
-        boxView.setPWC(box.getPWC());
-        boxView.setConfigModBus(box.getConfigModBus());
-        boxView.setOoo(box.getOoo());
-        boxView.setApn(box.getApn());
-        boxView.setUsr(box.getUsr());
-        boxView.setPwd(box.getPwd());
+
+        // Copy Modele information
+        if (box.getModele() != null) {
+            boxView.setModeleId(box.getModele().getId());
+            boxView.setModeleName(box.getModele().getName());
+            boxView.setModeleAttributes(box.getModele().getAttributes());
+        } else {
+            boxView.setModeleId(null);
+            boxView.setModeleName(null);
+            boxView.setModeleAttributes(new java.util.HashMap<>());
+        }
 
         queryRepository.save(boxView);
     }

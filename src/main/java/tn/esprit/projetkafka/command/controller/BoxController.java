@@ -8,6 +8,7 @@ import tn.esprit.projetkafka.command.service.BoxService;
 
 @RestController
 @RequestMapping("/boxes")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BoxController {
     private final BoxService service;
 
@@ -29,6 +30,6 @@ public class BoxController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBox(@PathVariable Long id) {
         service.deleteBox(id);
-        return ResponseEntity.noContent().build(); // HTTP 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }

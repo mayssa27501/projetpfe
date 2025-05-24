@@ -23,7 +23,6 @@ public class ModeleEventConsumer {
         modeleView.setName(modele.getName());
         modeleView.setDescription(modele.getDescription());
         modeleView.setAttributes(modele.getAttributes());
-
         queryRepository.save(modeleView);
     }
 }
