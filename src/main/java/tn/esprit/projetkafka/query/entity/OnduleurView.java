@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 
-@Table(name = "Onduleur_view")
+@Table(name = "onduleur_view")
 public class OnduleurView {
 
     @Id
@@ -48,6 +48,8 @@ public class OnduleurView {
 
     @JsonProperty("bloque")
     private Boolean bloque;
+    @JsonProperty("groupeOnduleurId")
+    private Long groupeOnduleurId;
 
     // Getters et Setters
     public Long getId() { return id; }
@@ -88,4 +90,6 @@ public class OnduleurView {
 
     public Boolean getBloque() { return bloque; }
     public void setBloque(Boolean bloque) { this.bloque = bloque; }
+    public Long getGroupeOnduleurId() { return groupeOnduleurId; }
+    public void setGroupeOnduleurId(Long groupeOnduleurId) { this.groupeOnduleurId = groupeOnduleurId; }
 }

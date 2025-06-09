@@ -1,8 +1,10 @@
 package tn.esprit.projetkafka.command.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +30,31 @@ public class Box {
 
     @OneToMany(mappedBy = "box")
     private List<BoxCommand> boxCommands;
+
     @ElementCollection
     @MapKeyColumn(name = "attribute_key")
     @Column(name = "attribute_value")
     @CollectionTable(name = "box_attributes", joinColumns = @JoinColumn(name = "box_id"))
     @JsonProperty("modeleAttributes")
     private Map<String, String> modeleAttributes = new HashMap<>();
-    // Event type for Kafka events
+
     private String eventType;
+
+    @OneToMany(mappedBy = "box", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Onduleur> onduleurs = new ArrayList<>();
+
+    // Utility method to add an Onduleur
+    public void addOnduleur(Onduleur onduleur) {
+        onduleurs.add(onduleur);
+        onduleur.setBox(this);
+    }
+
+    // Utility method to remove an Onduleur
+    public void removeOnduleur(Onduleur onduleur) {
+        onduleurs.remove(onduleur);
+        onduleur.setBox(null);
+    }
 
     // Getters & Setters
     public Long getId() { return id; }
@@ -61,6 +80,13 @@ public class Box {
 
     public String getEventType() { return eventType; }
     public void setEventType(String eventType) { this.eventType = eventType; }
+
     public Map<String, String> getModeleAttributes() { return modeleAttributes; }
     public void setModeleAttributes(Map<String, String> modeleAttributes) { this.modeleAttributes = modeleAttributes; }
+
+    public List<Onduleur> getOnduleurs() { return onduleurs; }
+    public void setOnduleurs(List<Onduleur> onduleurs) {
+        this.onduleurs.clear();
+        onduleurs.forEach(this::addOnduleur);
+    }
 }

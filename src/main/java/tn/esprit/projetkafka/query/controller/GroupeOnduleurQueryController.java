@@ -6,25 +6,25 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import tn.esprit.projetkafka.query.entity.OnduleurView;
-import tn.esprit.projetkafka.query.service.OnduleurQueryService;
+import tn.esprit.projetkafka.query.entity.GroupeOnduleurView;
+import tn.esprit.projetkafka.query.service.GroupeOnduleurQueryService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/query/onduleurs")
+@RequestMapping("/query/groupe-onduleurs")
 @CrossOrigin(origins = "http://localhost:4200")
-public class OnduleurQueryController {
+public class GroupeOnduleurQueryController {
 
-    private final OnduleurQueryService service;
+    private final GroupeOnduleurQueryService service;
 
     @Autowired
-    public OnduleurQueryController(OnduleurQueryService service) {
+    public GroupeOnduleurQueryController(GroupeOnduleurQueryService service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<List<OnduleurView>> getOnduleurs() {
-        return ResponseEntity.ok(service.getAllOnduleurs());
+    public ResponseEntity<List<GroupeOnduleurView>> getGroupeOnduleurs() {
+        return ResponseEntity.ok(service.getAllGroupeOnduleurs());
     }
 }

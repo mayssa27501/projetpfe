@@ -1,11 +1,11 @@
 package tn.esprit.projetkafka.query.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -33,9 +33,11 @@ public class BoxView {
     @JsonProperty("isBlocked")
     private Boolean isBlocked;
 
-    // Store Modele attributes directly in the view for easy querying
     @JsonProperty("modeleAttributes")
     private Map<String, String> modeleAttributes = new HashMap<>();
+
+    @JsonProperty("onduleurs")
+    private List<Long> onduleurIds = new ArrayList<>(); // Store only IDs to avoid duplication
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -61,4 +63,7 @@ public class BoxView {
 
     public Map<String, String> getModeleAttributes() { return modeleAttributes; }
     public void setModeleAttributes(Map<String, String> modeleAttributes) { this.modeleAttributes = modeleAttributes; }
+
+    public List<Long> getOnduleurIds() { return onduleurIds; }
+    public void setOnduleurIds(List<Long> onduleurIds) { this.onduleurIds = new ArrayList<>(onduleurIds); }
 }

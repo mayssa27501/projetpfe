@@ -1,5 +1,7 @@
 package tn.esprit.projetkafka.event.consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -9,6 +11,7 @@ import tn.esprit.projetkafka.query.repository.OnduleurViewRepository;
 
 @Component
 public class OnduleurEventConsumer {
+    private static final Logger logger = LoggerFactory.getLogger(OnduleurEventConsumer.class);
     private final OnduleurViewRepository queryRepository;
 
     @Autowired
@@ -18,8 +21,14 @@ public class OnduleurEventConsumer {
 
     @KafkaListener(topics = "onduleur-events", groupId = "onduleur-group")
     public void consumeOnduleurEvent(Onduleur onduleur) {
-        // Détecter une suppression si l'objet est minimal (seul id est défini)
+        logger.info("Received Onduleur event: id={}, code={}, boxId={}",
+                onduleur.getId(),
+                onduleur.getCode(),
+                onduleur.getBox() != null ? onduleur.getBox().getId() : null);
+
+        // Suppression si id non nul et code + description nuls (signal de suppression)
         if (onduleur.getId() != null && onduleur.getCode() == null && onduleur.getDescription() == null) {
+            logger.info("Deleting OnduleurView with id={}", onduleur.getId());
             queryRepository.deleteById(onduleur.getId());
             return;
         }
@@ -35,29 +44,17 @@ public class OnduleurEventConsumer {
         onduleurView.setProductionKwh(onduleur.getProductionKwh());
         onduleurView.setBloque(onduleur.getBloque());
 
-        // Copier siteId depuis Site
-        if (onduleur.getSite() != null) {
-            onduleurView.setSiteId(onduleur.getSite().getId());
-        } else {
-            onduleurView.setSiteId(null);
-        }
+        // Mapping IDs avec contrôle null
+        onduleurView.setSiteId(onduleur.getSite() != null ? onduleur.getSite().getId() : null);
+        onduleurView.setLocaleId(onduleur.getLocale() != null ? onduleur.getLocale().getId() : null);
+        onduleurView.setBoxId(onduleur.getBox() != null ? onduleur.getBox().getId() : null);
+        onduleurView.setGroupeOnduleurId(onduleur.getGroupeOnduleur() != null ? onduleur.getGroupeOnduleur().getId() : null);
 
-        // Copier localeId depuis Locale
-        if (onduleur.getLocale() != null) {
-            onduleurView.setLocaleId(onduleur.getLocale().getId());
-        } else {
-            onduleurView.setLocaleId(null);
+        try {
+            queryRepository.save(onduleurView);
+            logger.info("Saved OnduleurView with id={}", onduleurView.getId());
+        } catch (Exception e) {
+            logger.error("Failed to save OnduleurView with id={}: {}", onduleurView.getId(), e.getMessage(), e);
         }
-
-        // Copier boxId et boxCode depuis Box
-        if (onduleur.getBox() != null) {
-            onduleurView.setBoxId(onduleur.getBox().getId());
-            onduleurView.setBoxCode(onduleur.getBox().getCode());
-        } else {
-            onduleurView.setBoxId(null);
-            onduleurView.setBoxCode(null);
-        }
-
-        queryRepository.save(onduleurView);
     }
 }

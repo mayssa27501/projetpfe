@@ -18,9 +18,4 @@ public class OnduleurQueryService {
     public List<OnduleurView> getAllOnduleurs() {
         return repository.findAll();
     }
-
-    public OnduleurView findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("OnduleurView not found with id: " + id));
-    }
 }

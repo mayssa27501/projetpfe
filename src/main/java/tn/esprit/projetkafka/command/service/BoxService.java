@@ -3,6 +3,7 @@ package tn.esprit.projetkafka.command.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.projetkafka.command.entity.Box;
 import tn.esprit.projetkafka.command.entity.Modele;
 import tn.esprit.projetkafka.command.repository.BoxRepository;
@@ -22,13 +23,14 @@ public class BoxService {
         this.eventProducer = eventProducer;
     }
 
+    @Transactional
     public Box createBox(Box box) {
         logger.info("Creating box with code: {}", box.getCode());
         if (box.getModele() != null && box.getModele().getId() != null) {
             Modele fullModele = modeleRepository.findById(box.getModele().getId())
                     .orElseThrow(() -> {
                         logger.error("Modele not found with ID: {}", box.getModele().getId());
-                        return new RuntimeException("Modele non trouvé avec l'ID : " + box.getModele().getId());
+                        return new RuntimeException("Modele not found with ID: " + box.getModele().getId());
                     });
             box.setModele(fullModele);
         } else {
@@ -41,6 +43,7 @@ public class BoxService {
         return savedBox;
     }
 
+    @Transactional
     public Box updateBox(Long id, Box updatedBox) {
         logger.info("Updating box with ID: {}. Incoming modeleAttributes: {}", id, updatedBox.getModeleAttributes());
         return repository.findById(id).map(existingBox -> {
@@ -48,7 +51,7 @@ public class BoxService {
                 Modele fullModele = modeleRepository.findById(updatedBox.getModele().getId())
                         .orElseThrow(() -> {
                             logger.error("Modele not found with ID: {}", updatedBox.getModele().getId());
-                            return new RuntimeException("Modele non trouvé avec l'ID : " + updatedBox.getModele().getId());
+                            return new RuntimeException("Modele not found with ID: " + updatedBox.getModele().getId());
                         });
                 existingBox.setModele(fullModele);
             } else {
@@ -67,6 +70,7 @@ public class BoxService {
                 logger.warn("No modeleAttributes provided for box ID: {}", id);
                 existingBox.getModeleAttributes().clear();
             }
+            // Note: Onduleurs are managed via OnduleurService, so no direct update here
             logger.debug("Saving box with updated modeleAttributes: {}", existingBox.getModeleAttributes());
             Box saved = repository.save(existingBox);
             logger.info("Box updated with ID: {}. Final modeleAttributes: {}", saved.getId(), saved.getModeleAttributes());
@@ -74,14 +78,15 @@ public class BoxService {
             return saved;
         }).orElseThrow(() -> {
             logger.error("Box not found with ID: {}", id);
-            return new RuntimeException("Box not found with id: " + id);
+            return new RuntimeException("Box not found with ID: " + id);
         });
     }
 
+    @Transactional
     public void deleteBox(Long id) {
         if (!repository.existsById(id)) {
             logger.error("Box not found with ID: {}", id);
-            throw new RuntimeException("Box not found with id: " + id);
+            throw new RuntimeException("Box not found with ID: " + id);
         }
         logger.info("Deleting box with ID: {}", id);
         repository.deleteById(id);
