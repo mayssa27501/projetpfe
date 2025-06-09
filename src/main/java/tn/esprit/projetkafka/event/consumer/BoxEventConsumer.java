@@ -6,11 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import tn.esprit.projetkafka.command.entity.Box;
-import tn.esprit.projetkafka.command.entity.Onduleur; // Importation ajoutée
 import tn.esprit.projetkafka.query.entity.BoxView;
+import tn.esprit.projetkafka.query.entity.OnduleurView;
 import tn.esprit.projetkafka.query.repository.BoxViewRepository;
 import tn.esprit.projetkafka.query.repository.OnduleurViewRepository;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,10 +54,12 @@ public class BoxEventConsumer {
             boxView.setModeleAttributes(new java.util.HashMap<>());
         }
 
-        // Update onduleurIds
-        boxView.setOnduleurIds(box.getOnduleurs().stream()
-                .map(Onduleur::getId)
-                .collect(Collectors.toList()));
+        // Fetch OnduleurView entities that reference this Box
+        List<OnduleurView> onduleurViews = onduleurViewRepository.findByBoxId(box.getId());
+        List<Long> onduleurIds = onduleurViews.stream()
+                .map(OnduleurView::getId)
+                .collect(Collectors.toList());
+        boxView.setOnduleurIds(onduleurIds);
 
         try {
             queryRepository.save(boxView);

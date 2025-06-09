@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import tn.esprit.projetkafka.command.entity.Box;
 import tn.esprit.projetkafka.command.entity.Onduleur;
 import tn.esprit.projetkafka.query.entity.OnduleurView;
 import tn.esprit.projetkafka.query.repository.OnduleurViewRepository;
@@ -26,7 +27,6 @@ public class OnduleurEventConsumer {
                 onduleur.getCode(),
                 onduleur.getBox() != null ? onduleur.getBox().getId() : null);
 
-        // Suppression si id non nul et code + description nuls (signal de suppression)
         if (onduleur.getId() != null && onduleur.getCode() == null && onduleur.getDescription() == null) {
             logger.info("Deleting OnduleurView with id={}", onduleur.getId());
             queryRepository.deleteById(onduleur.getId());
@@ -44,7 +44,6 @@ public class OnduleurEventConsumer {
         onduleurView.setProductionKwh(onduleur.getProductionKwh());
         onduleurView.setBloque(onduleur.getBloque());
 
-        // Mapping IDs avec contrôle null
         onduleurView.setSiteId(onduleur.getSite() != null ? onduleur.getSite().getId() : null);
         onduleurView.setLocaleId(onduleur.getLocale() != null ? onduleur.getLocale().getId() : null);
         onduleurView.setBoxId(onduleur.getBox() != null ? onduleur.getBox().getId() : null);

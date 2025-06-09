@@ -29,8 +29,11 @@ public class OnduleurService {
             } else {
                 throw new RuntimeException("Box with id " + onduleur.getBox().getId() + " not found");
             }
+        } else if (onduleur.getBox() != null && onduleur.getBox().getId() == null) {
+            // Persist new Box if provided
+            boxRepository.save(onduleur.getBox());
         } else {
-            onduleur.setBox(null); // Pas de box associée
+            onduleur.setBox(null); // No box associated
         }
         return onduleurRepository.save(onduleur);
     }
@@ -40,11 +43,25 @@ public class OnduleurService {
                 .orElseThrow(() -> new RuntimeException("Onduleur with id " + id + " not found"));
 
         existingOnduleur.setCode(onduleur.getCode());
+        existingOnduleur.setDescription(onduleur.getDescription());
+        existingOnduleur.setSite(onduleur.getSite());
+        existingOnduleur.setLocale(onduleur.getLocale());
+        existingOnduleur.setGroupeOnduleur(onduleur.getGroupeOnduleur());
+        existingOnduleur.setIndex(onduleur.getIndex());
+        existingOnduleur.setDateCommunication(onduleur.getDateCommunication());
+        existingOnduleur.setHeure(onduleur.getHeure());
+        existingOnduleur.setConsommationKwh(onduleur.getConsommationKwh());
+        existingOnduleur.setProductionKwh(onduleur.getProductionKwh());
+        existingOnduleur.setBloque(onduleur.getBloque());
 
         if (onduleur.getBox() != null && onduleur.getBox().getId() != null) {
             Box box = boxRepository.findById(onduleur.getBox().getId())
                     .orElseThrow(() -> new RuntimeException("Box with id " + onduleur.getBox().getId() + " not found"));
             existingOnduleur.setBox(box);
+        } else if (onduleur.getBox() != null && onduleur.getBox().getId() == null) {
+            // Persist new Box if provided
+            boxRepository.save(onduleur.getBox());
+            existingOnduleur.setBox(onduleur.getBox());
         } else {
             existingOnduleur.setBox(null);
         }

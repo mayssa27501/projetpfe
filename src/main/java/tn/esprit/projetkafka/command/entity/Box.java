@@ -1,9 +1,7 @@
 package tn.esprit.projetkafka.command.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,22 +38,6 @@ public class Box {
 
     private String eventType;
 
-    @OneToMany(mappedBy = "box", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Onduleur> onduleurs = new ArrayList<>();
-
-    // Utility method to add an Onduleur
-    public void addOnduleur(Onduleur onduleur) {
-        onduleurs.add(onduleur);
-        onduleur.setBox(this);
-    }
-
-    // Utility method to remove an Onduleur
-    public void removeOnduleur(Onduleur onduleur) {
-        onduleurs.remove(onduleur);
-        onduleur.setBox(null);
-    }
-
     // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -83,10 +65,4 @@ public class Box {
 
     public Map<String, String> getModeleAttributes() { return modeleAttributes; }
     public void setModeleAttributes(Map<String, String> modeleAttributes) { this.modeleAttributes = modeleAttributes; }
-
-    public List<Onduleur> getOnduleurs() { return onduleurs; }
-    public void setOnduleurs(List<Onduleur> onduleurs) {
-        this.onduleurs.clear();
-        onduleurs.forEach(this::addOnduleur);
-    }
 }

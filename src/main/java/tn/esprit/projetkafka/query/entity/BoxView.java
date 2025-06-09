@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Table(name = "box_view")
 public class BoxView {
 
@@ -36,8 +35,8 @@ public class BoxView {
     @JsonProperty("modeleAttributes")
     private Map<String, String> modeleAttributes = new HashMap<>();
 
-    @JsonProperty("onduleurs")
-    private List<Long> onduleurIds = new ArrayList<>(); // Store only IDs to avoid duplication
+    @JsonProperty("onduleurIds")
+    private List<Long> onduleurIds = new ArrayList<>();
 
     // Getters and Setters
     public Long getId() { return id; }

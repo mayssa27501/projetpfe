@@ -22,9 +22,6 @@ public class OnduleurView {
     @JsonProperty("boxId")
     private Long boxId;
 
-    @JsonProperty("boxCode")
-    private String boxCode;
-
     @JsonProperty("code")
     private String code;
 
@@ -48,10 +45,11 @@ public class OnduleurView {
 
     @JsonProperty("bloque")
     private Boolean bloque;
+
     @JsonProperty("groupeOnduleurId")
     private Long groupeOnduleurId;
 
-    // Getters et Setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -63,9 +61,6 @@ public class OnduleurView {
 
     public Long getBoxId() { return boxId; }
     public void setBoxId(Long boxId) { this.boxId = boxId; }
-
-    public String getBoxCode() { return boxCode; }
-    public void setBoxCode(String boxCode) { this.boxCode = boxCode; }
 
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
@@ -90,6 +85,7 @@ public class OnduleurView {
 
     public Boolean getBloque() { return bloque; }
     public void setBloque(Boolean bloque) { this.bloque = bloque; }
+
     public Long getGroupeOnduleurId() { return groupeOnduleurId; }
     public void setGroupeOnduleurId(Long groupeOnduleurId) { this.groupeOnduleurId = groupeOnduleurId; }
 }

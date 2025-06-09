@@ -1,6 +1,5 @@
 package tn.esprit.projetkafka.command.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -24,9 +23,8 @@ public class Onduleur {
     @JoinColumn(name = "locale_id")
     private Locale locale;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "box_id")
-    @JsonBackReference
     private Box box;
 
     @ManyToOne(cascade = {CascadeType.MERGE})

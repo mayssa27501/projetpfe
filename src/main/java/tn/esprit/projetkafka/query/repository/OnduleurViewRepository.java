@@ -1,9 +1,10 @@
 package tn.esprit.projetkafka.query.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
 import tn.esprit.projetkafka.query.entity.OnduleurView;
 
-@Repository
+import java.util.List;
+
 public interface OnduleurViewRepository extends MongoRepository<OnduleurView, Long> {
+    List<OnduleurView> findByBoxId(Long boxId);
 }

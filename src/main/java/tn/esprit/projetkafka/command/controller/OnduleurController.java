@@ -27,14 +27,12 @@ public class OnduleurController {
     @PostMapping
     public ResponseEntity<?> createOnduleur(@RequestBody Onduleur onduleur) {
         logger.info("Received create Onduleur request: code={}, box={}",
-                onduleur.getCode(), onduleur.getBox() != null ? "id=" + onduleur.getBox().getId() : "null");
+                onduleur.getCode(),
+                onduleur.getBox() != null ? "id=" + onduleur.getBox().getId() : "null");
 
         try {
             Onduleur createdOnduleur = service.createOnduleur(onduleur);
-
-            // Envoi de l'événement Kafka après création réussie
             eventProducer.sendOnduleurEvent(createdOnduleur);
-
             return ResponseEntity.ok(createdOnduleur);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request: {}", e.getMessage());
@@ -48,14 +46,12 @@ public class OnduleurController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOnduleur(@PathVariable Long id, @RequestBody Onduleur onduleur) {
         logger.info("Received update Onduleur request: id={}, code={}, box={}",
-                id, onduleur.getCode(), onduleur.getBox() != null ? "id=" + onduleur.getBox().getId() : "null");
+                id, onduleur.getCode(),
+                onduleur.getBox() != null ? "id=" + onduleur.getBox().getId() : "null");
 
         try {
             Onduleur updatedOnduleur = service.updateOnduleur(id, onduleur);
-
-            // Envoi de l'événement Kafka après mise à jour réussie
             eventProducer.sendOnduleurEvent(updatedOnduleur);
-
             return ResponseEntity.ok(updatedOnduleur);
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid request: {}", e.getMessage());
