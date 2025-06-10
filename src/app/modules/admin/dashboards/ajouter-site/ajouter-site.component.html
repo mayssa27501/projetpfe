@@ -1,0 +1,230 @@
+<!-- Overlay -->
+<div class="overlay" *ngIf="formVisible || showDetails" (click)="toggleForm(); closeDetails()"></div>
+
+<!-- Drawer -->
+<div class="drawer" [class.open]="formVisible">
+  <div class="p-6">
+    <h3 class="text-2xl font-bold mb-6 text-gray-800">
+      {{ isEditMode ? 'Modifier un site' : 'Ajouter un site' }}
+    </h3>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Edit Mode: Tabs -->
+    <mat-tab-group *ngIf="isEditMode && !isLoading" mat-align-tabs="start" (selectedTabChange)="logTabChange($event)">
+      <!-- Tab 1: General Info -->
+      <mat-tab label="Informations Générales">
+        <div class="tab-content">
+          <form [formGroup]="siteForm" (ngSubmit)="persistSite('site')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="siteForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Adresse</mat-label>
+              <input matInput type="text" formControlName="address" required />
+              <mat-error *ngIf="siteForm.get('address')?.hasError('required')">
+                L'adresse est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fuseau horaire</mat-label>
+              <input matInput type="text" formControlName="timeZone" required />
+              <mat-error *ngIf="siteForm.get('timeZone')?.hasError('required')">
+                Le fuseau horaire est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Position GPS</mat-label>
+              <input matInput type="text" formControlName="positionGps" required />
+              <mat-error *ngIf="siteForm.get('positionGps')?.hasError('required')">
+                La position GPS est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+            <mat-checkbox formControlName="isPrincipal">Principal</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Fermer
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!siteForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 2: Basic Info -->
+      <mat-tab label="Informations Basiques">
+        <div class="tab-content">
+          <form [formGroup]="basicInfoForm" (ngSubmit)="persistSite('basic')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="basicInfoForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Adresse</mat-label>
+              <input matInput type="text" formControlName="address" required />
+              <mat-error *ngIf="basicInfoForm.get('address')?.hasError('required')">
+                L'adresse est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+            <mat-checkbox formControlName="isPrincipal">Principal</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Annuler
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!basicInfoForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Add Mode: Single Form -->
+    <div *ngIf="!isEditMode && !isLoading">
+      <form [formGroup]="siteForm" (ngSubmit)="persistSite('site')" class="space-y-5">
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput type="text" formControlName="description" required />
+          <mat-error *ngIf="siteForm.get('description')?.hasError('required')">
+            La description est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse</mat-label>
+          <input matInput type="text" formControlName="address" required />
+          <mat-error *ngIf="siteForm.get('address')?.hasError('required')">
+            L'adresse est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fuseau horaire</mat-label>
+          <input matInput type="text" formControlName="timeZone" required />
+          <mat-error *ngIf="siteForm.get('timeZone')?.hasError('required')">
+            Le fuseau horaire est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Position GPS</mat-label>
+          <input matInput type="text" formControlName="positionGps" required />
+          <mat-error *ngIf="siteForm.get('positionGps')?.hasError('required')">
+            La position GPS est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+        <mat-checkbox formControlName="isPrincipal">Principal</mat-checkbox>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+            Annuler
+          </button>
+          <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!siteForm.valid">
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Card with Table -->
+<div class="card-container">
+  <div class="card">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-2xl font-bold text-gray-800">Liste des sites</h3>
+      <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
+        {{ formVisible ? 'Annuler' : 'Ajouter un site' }}
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</div>
+
+    <!-- Table -->
+    <table class="styled-table" *ngIf="!isLoading && sites.length">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Adresse</th>
+          <th>Fuseau horaire</th>
+          <th>Position GPS</th>
+          <th>Bloqué</th>
+          <th>Principal</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let site of sites" class="hover-row">
+          <td (click)="editSite(site)">{{ site.description }}</td>
+          <td (click)="editSite(site)">{{ site.address }}</td>
+          <td (click)="editSite(site)">{{ site.timeZone }}</td>
+          <td (click)="editSite(site)">{{ site.positionGps }}</td>
+          <td (click)="editSite(site)">{{ site.isBlocked ? 'Oui' : 'Non' }}</td>
+          <td (click)="editSite(site)">{{ site.isPrincipal ? 'Oui' : 'Non' }}</td>
+          <td>
+            <button mat-icon-button color="warn" class="debug-button" (click)="deleteSite(site.id, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button class="debug-button info-button" (click)="showSiteDetails(site); $event.stopPropagation()">
+              <mat-icon>info</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !sites.length && !errorMessage" class="text-center p-4">
+      Aucun site disponible
+    </div>
+  </div>
+</div>
+
+<!-- Details Panel -->
+<div class="details-panel" *ngIf="showDetails">
+  <button class="close-button" (click)="closeDetails()">×</button>
+  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails du site</h3>
+  <div class="space-y-4">
+    <h4 class="text-lg font-semibold">Informations Générales</h4>
+    <p><strong>Description :</strong> {{ selectedSiteForDetails?.description || 'N/A' }}</p>
+    <p><strong>Adresse :</strong> {{ selectedSiteForDetails?.address || 'N/A' }}</p>
+    <p><strong>Fuseau horaire :</strong> {{ selectedSiteForDetails?.timeZone || 'N/A' }}</p>
+    <p><strong>Position GPS :</strong> {{ selectedSiteForDetails?.positionGps || 'N/A' }}</p>
+    <p><strong>Bloqué :</strong> {{ selectedSiteForDetails?.isBlocked ? 'Oui' : 'Non' }}</p>
+    <p><strong>Principal :</strong> {{ selectedSiteForDetails?.isPrincipal ? 'Oui' : 'Non' }}</p>
+  </div>
+</div>

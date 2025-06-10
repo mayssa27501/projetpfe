@@ -1,0 +1,290 @@
+<!-- Overlay -->
+<div class="overlay" *ngIf="formVisible || showDetails" (click)="toggleForm(); closeDetails()"></div>
+
+<!-- Drawer -->
+<div class="drawer" [class.open]="formVisible">
+  <div class="p-6">
+    <h3 class="text-2xl font-bold mb-6 text-gray-800">
+      {{ isEditMode ? 'Modifier une box' : 'Ajouter une box' }}
+    </h3>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Edit Mode: Tabs -->
+    <mat-tab-group *ngIf="isEditMode && !isLoading" mat-align-tabs="start" (selectedTabChange)="logTabChange($event)">
+      <!-- Tab 1: General Info -->
+      <mat-tab label="Informations Générales">
+        <div class="tab-content">
+          <form [formGroup]="boxForm" (ngSubmit)="persistBox('box')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput type="text" formControlName="code" required />
+              <mat-error *ngIf="boxForm.get('code')?.hasError('required')">
+                Le code est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="boxForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Serial N°</mat-label>
+              <input matInput type="text" formControlName="serialNumber" required />
+              <mat-error *ngIf="boxForm.get('serialNumber')?.hasError('required')">
+                Le numéro de série est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Modèle</mat-label>
+              <mat-select formControlName="modeleId" required>
+                <mat-option *ngFor="let modele of modeles" [value]="modele.id">
+                  {{ modele.name }}
+                </mat-option>
+                <mat-option *ngIf="!modeles.length" disabled>Aucun modèle disponible</mat-option>
+              </mat-select>
+              <mat-error *ngIf="boxForm.get('modeleId')?.hasError('required')">
+                Le modèle est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Fermer
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!boxForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 2: Basic Info -->
+      <mat-tab label="Informations Basiques">
+        <div class="tab-content">
+          <form [formGroup]="basicInfoForm" (ngSubmit)="persistBox('basic')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput type="text" formControlName="code" required />
+              <mat-error *ngIf="basicInfoForm.get('code')?.hasError('required')">
+                Le code est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="basicInfoForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Annuler
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!basicInfoForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 3: Hardware Configuration -->
+      <mat-tab label="Configuration Matérielle">
+        <div class="tab-content">
+          <!-- Modify Button at Top -->
+          <div class="flex justify-end mb-4">
+            <button mat-flat-button color="primary" class="debug-button" (click)="persistBox('hardware')" [disabled]="!hardwareConfigForm.valid">
+              Modifier Config
+            </button>
+          </div>
+
+          <!-- Debug Info -->
+          <div class="text-sm text-gray-500 mb-2">
+            Hardware Config Form Valid: {{ hardwareConfigForm.valid }}
+            <br />
+            Attributes Loaded: {{ modeleAttributesKeys.length }}
+          </div>
+
+          <form [formGroup]="hardwareConfigForm" (ngSubmit)="persistBox('hardware')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput type="text" formControlName="code" required />
+              <mat-error *ngIf="hardwareConfigForm.get('code')?.hasError('required')">
+                Le code est requis
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Dynamic Attributes -->
+            <mat-form-field appearance="outline" *ngFor="let key of modeleAttributesKeys">
+              <mat-label>{{ key | titlecase }}</mat-label>
+              <input matInput type="text" [formControlName]="key" />
+              <mat-error *ngIf="hardwareConfigForm.get(key)?.hasError('required')">
+                {{ key | titlecase }} est requis
+              </mat-error>
+            </mat-form-field>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Annuler
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!hardwareConfigForm.valid">
+                Modifier Config
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Add Mode: Single Form -->
+    <div *ngIf="!isEditMode && !isLoading">
+      <form [formGroup]="boxForm" (ngSubmit)="persistBox('box')" class="space-y-5">
+        <mat-form-field appearance="outline">
+          <mat-label>Code</mat-label>
+          <input matInput type="text" formControlName="code" required />
+          <mat-error *ngIf="boxForm.get('code')?.hasError('required')">
+            Le code est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput type="text" formControlName="description" required />
+          <mat-error *ngIf="boxForm.get('description')?.hasError('required')">
+            La description est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Serial N°</mat-label>
+          <input matInput type="text" formControlName="serialNumber" required />
+          <mat-error *ngIf="boxForm.get('serialNumber')?.hasError('required')">
+            Le numéro de série est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Modèle</mat-label>
+          <mat-select formControlName="modeleId" required>
+            <mat-option *ngFor="let modele of modeles" [value]="modele.id">
+              {{ modele.name }}
+            </mat-option>
+            <mat-option *ngIf="!modeles.length" disabled>Aucun modèle disponible</mat-option>
+          </mat-select>
+          <mat-error *ngIf="boxForm.get('modeleId')?.hasError('required')">
+            Le modèle est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="isBlocked">Bloqué</mat-checkbox>
+
+        <div class="text-sm text-gray-500 mb-2">
+          Modèles chargés : {{ modeles.length }}
+        </div>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+            Annuler
+          </button>
+          <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!boxForm.valid">
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Card with Table -->
+<div class="card-container">
+  <div class="card">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-2xl font-bold text-gray-800">Liste des boxes</h3>
+      <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
+        {{ formVisible ? 'Annuler' : 'Ajouter une Box' }}
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</div>
+
+    <!-- Table -->
+    <table class="styled-table" *ngIf="!isLoading && boxes.length">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Description</th>
+          <th>Serial N°</th>
+          <th>Modèle</th>
+          <th>Bloqué</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let box of boxes" class="hover-row">
+          <td (click)="editBox(box)">{{ box.code }}</td>
+          <td (click)="editBox(box)">{{ box.description }}</td>
+          <td (click)="editBox(box)">{{ box.serialNumber }}</td>
+          <td (click)="editBox(box)">{{ box.modele.name }}</td>
+          <td (click)="editBox(box)">{{ box.isBlocked ? 'Oui' : 'Non' }}</td>
+          <td>
+            <button mat-icon-button color="warn" class="debug-button" (click)="deleteBox(box.id, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button class="debug-button info-button" (click)="showBoxDetails(box); $event.stopPropagation()">
+              <mat-icon>info</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !boxes.length && !errorMessage" class="text-center p-4">
+      Aucune box disponible
+    </div>
+  </div>
+</div>
+
+<!-- Details Panel -->
+<div class="details-panel" *ngIf="showDetails">
+  <button class="close-button" (click)="closeDetails()">×</button>
+  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails de la Box</h3>
+  <div class="space-y-4">
+    <h4 class="text-lg font-semibold">Informations Générales</h4>
+    <p><strong>Code :</strong> {{ selectedBoxForDetails?.code || 'N/A' }}</p>
+    <p><strong>Description :</strong> {{ selectedBoxForDetails?.description || 'N/A' }}</p>
+    <p><strong>Numéro de Série :</strong> {{ selectedBoxForDetails?.serialNumber || 'N/A' }}</p>
+    <p><strong>Modèle :</strong> {{ selectedBoxForDetails?.modele?.name || 'N/A' }}</p>
+    <p><strong>Bloqué :</strong> {{ selectedBoxForDetails?.isBlocked ? 'Oui' : 'Non' }}</p>
+
+    <h4 class="text-lg font-semibold mt-4">Configuration Matérielle</h4>
+    <p *ngFor="let key of modeleAttributesKeys">
+      <strong>{{ key | titlecase }} :</strong> {{ selectedBoxForDetails?.modeleAttributes[key] || 'N/A' }}
+    </p>
+  </div>
+</div>

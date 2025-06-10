@@ -1,0 +1,265 @@
+<!-- Overlay -->
+<div class="overlay" *ngIf="formVisible || showDetails" (click)="toggleForm(); closeDetails()"></div>
+
+<!-- Drawer -->
+<div class="drawer" [class.open]="formVisible">
+  <div class="p-6">
+    <h3 class="text-2xl font-bold mb-6 text-gray-800">
+      {{ isEditMode ? 'Modifier un groupe onduleur' : 'Ajouter un groupe onduleur' }}
+    </h3>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Edit Mode: Tabs -->
+    <mat-tab-group *ngIf="isEditMode && !isLoading" mat-align-tabs="start" (selectedTabChange)="logTabChange($event)">
+      <!-- Tab 1: General Info -->
+      <mat-tab label="Informations Générales">
+        <div class="tab-content">
+          <form [formGroup]="groupeOnduleurForm" (ngSubmit)="persistGroupeOnduleur('groupe')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput type="text" formControlName="code" required />
+              <mat-error *ngIf="groupeOnduleurForm.get('code')?.hasError('required')">
+                Le code est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="groupeOnduleurForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Opération</mat-label>
+              <input matInput type="text" formControlName="operation" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Site</mat-label>
+              <mat-select formControlName="siteId">
+                <mat-option *ngFor="let site of sites" [value]="site.id">
+                  {{ site.name }}
+                </mat-option>
+                <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Onduleurs</mat-label>
+              <mat-select formControlName="onduleurIds" multiple>
+                <mat-option *ngFor="let onduleur of onduleurs" [value]="onduleur.id">
+                  {{ onduleur.code }}
+                </mat-option>
+                <mat-option *ngIf="!onduleurs.length" disabled>Aucun onduleur disponible</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="bloque">Bloqué</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Fermer
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!groupeOnduleurForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 2: Basic Info -->
+      <mat-tab label="Informations Basiques">
+        <div class="tab-content">
+          <form [formGroup]="basicInfoForm" (ngSubmit)="persistGroupeOnduleur('basic')" class="space-y-5">
+            <mat-form-field appearance="outline">
+              <mat-label>Code</mat-label>
+              <input matInput type="text" formControlName="code" required />
+              <mat-error *ngIf="basicInfoForm.get('code')?.hasError('required')">
+                Le code est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput type="text" formControlName="description" required />
+              <mat-error *ngIf="basicInfoForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="bloque">Bloqué</mat-checkbox>
+
+            <div class="flex justify-end gap-4 mt-6">
+              <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+                Annuler
+              </button>
+              <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!basicInfoForm.valid">
+                Modifier
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Add Mode: Single Form -->
+    <div *ngIf="!isEditMode && !isLoading">
+      <form [formGroup]="groupeOnduleurForm" (ngSubmit)="persistGroupeOnduleur('groupe')" class="space-y-5">
+        <mat-form-field appearance="outline">
+          <mat-label>Code</mat-label>
+          <input matInput type="text" formControlName="code" required />
+          <mat-error *ngIf="groupeOnduleurForm.get('code')?.hasError('required')">
+            Le code est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput type="text" formControlName="description" required />
+          <mat-error *ngIf="groupeOnduleurForm.get('description')?.hasError('required')">
+            La description est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Opération</mat-label>
+          <input matInput type="text" formControlName="operation" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Site</mat-label>
+          <mat-select formControlName="siteId">
+            <mat-option *ngFor="let site of sites" [value]="site.id">
+              {{ site.name }}
+            </mat-option>
+            <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Onduleurs</mat-label>
+          <mat-select formControlName="onduleurIds" multiple>
+            <mat-option *ngFor="let onduleur of onduleurs" [value]="onduleur.id">
+              {{ onduleur.code }}
+            </mat-option>
+            <mat-option *ngIf="!onduleurs.length" disabled>Aucun onduleur disponible</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="bloque">Bloqué</mat-checkbox>
+
+        <div class="text-sm text-gray-500 mb-2">
+          Sites chargés : {{ sites.length }} | Onduleurs chargés : {{ onduleurs.length }}
+        </div>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
+            Annuler
+          </button>
+          <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!groupeOnduleurForm.valid">
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Card with Table -->
+<div class="card-container">
+  <div class="card">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-2xl font-bold text-gray-800">Liste des groupes onduleurs</h3>
+      <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
+        {{ formVisible ? 'Annuler' : 'Ajouter un Groupe Onduleur' }}
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</div>
+
+    <!-- Table -->
+    <table class="styled-table" *ngIf="!isLoading && groupeOnduleurs.length">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Description</th>
+          <th>Opération</th>
+          <th>Site</th>
+          <th>Bloqué</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let groupe of groupeOnduleurs" class="hover-row">
+          <td (click)="editGroupeOnduleur(groupe)">{{ groupe.code }}</td>
+          <td (click)="editGroupeOnduleur(groupe)">{{ groupe.description }}</td>
+          <td (click)="editGroupeOnduleur(groupe)">{{ groupe.operation || 'N/A' }}</td>
+          <td (click)="editGroupeOnduleur(groupe)">{{ groupe.site.name || 'N/A' }}</td>
+          <td (click)="editGroupeOnduleur(groupe)">{{ groupe.bloque ? 'Oui' : 'Non' }}</td>
+          <td>
+            <button mat-icon-button color="warn" class="debug-button" (click)="deleteGroupeOnduleur(groupe.id, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button class="debug-button info-button" (click)="showGroupeOnduleurDetails(groupe); $event.stopPropagation()">
+              <mat-icon>info</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !groupeOnduleurs.length && !errorMessage" class="text-center p-4">
+      Aucun groupe onduleur disponible
+    </div>
+  </div>
+</div>
+
+<!-- Details Panel -->
+<div class="details-panel" *ngIf="showDetails">
+  <button class="close-button" (click)="closeDetails()">×</button>
+  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails du Groupe Onduleur</h3>
+  <div class="space-y-4">
+    <h4 class="text-lg font-semibold">Informations Générales</h4>
+    <p><strong>Code :</strong> {{ selectedGroupeOnduleurForDetails?.code || 'N/A' }}</p>
+    <p><strong>Description :</strong> {{ selectedGroupeOnduleurForDetails?.description || 'N/A' }}</p>
+    <p><strong>Opération :</strong> {{ selectedGroupeOnduleurForDetails?.operation || 'N/A' }}</p>
+    <p><strong>Site :</strong> {{ selectedGroupeOnduleurForDetails?.site?.name || 'N/A' }}</p>
+    <p><strong>Bloqué :</strong> {{ selectedGroupeOnduleurForDetails?.bloque ? 'Oui' : 'Non' }}</p>
+
+    <h4 class="text-lg font-semibold">Liste des Onduleurs</h4>
+    <div *ngIf="selectedGroupeOnduleurForDetails?.onduleurs?.length; else noOnduleurs" class="onduleur-cards">
+      <div *ngFor="let onduleur of selectedGroupeOnduleurForDetails.onduleurs" class="onduleur-card">
+        <div class="card-header">
+          <span class="card-title">{{ onduleur.code || 'N/A' }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Description :</strong> {{ onduleur.description || 'N/A' }}</p>
+          <p><strong>Boîtier :</strong> {{ onduleur.box?.code || 'N/A' }}</p>
+          <p><strong>Consommation (kWh) :</strong> {{ onduleur.consommationKwh || 'N/A' }}</p>
+          <p><strong>Production (kWh) :</strong> {{ onduleur.productionKwh || 'N/A' }}</p>
+          <p><strong>Bloqué :</strong> {{ onduleur.bloque ? 'Oui' : 'Non' }}</p>
+        </div>
+      </div>
+    </div>
+    <ng-template #noOnduleurs>
+      <p class="text-gray-500">Aucun onduleur associé à ce groupe.</p>
+    </ng-template>
+  </div>
+</div>
