@@ -1,9 +1,7 @@
 package tn.esprit.projetkafka.command.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +25,21 @@ public class GroupeOnduleur {
 
     private Boolean bloque;
 
-    @OneToMany(mappedBy = "groupeOnduleur")
+    @OneToMany(mappedBy = "groupeOnduleur", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonManagedReference
     private List<Onduleur> onduleurs = new ArrayList<>();
 
-    // Event type for Kafka events
     private String eventType;
+
+    // Méthode utilitaire pour affecter des onduleurs
+    public void assignOnduleurs(List<Onduleur> newOnduleurs) {
+        this.onduleurs.forEach(onduleur -> onduleur.setGroupeOnduleur(null)); // Dissocier les anciens
+        this.onduleurs.clear();
+        newOnduleurs.forEach(onduleur -> {
+            onduleur.setGroupeOnduleur(this); // Associer le nouveau groupe
+            this.onduleurs.add(onduleur);
+        });
+    }
 
     // Getters & Setters
     public Long getId() { return id; }

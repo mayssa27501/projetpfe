@@ -1,6 +1,5 @@
 package tn.esprit.projetkafka.command.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.List;
 public class Site {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String description;
@@ -19,36 +19,11 @@ public class Site {
     private Boolean isBlocked;
     private Boolean isPrincipal;
 
-//    @ManyToOne
-//    @JoinColumn(name = "society_id", nullable = false)
-//    private Society society;
-//
-//    @OneToMany(mappedBy = "site")
-//    @JsonIgnore
-//    private List<Locale> listLocale;
-//
-//    @OneToMany(mappedBy = "site")
-//    @JsonIgnore
-//    private List<CounterGroup> counterGroups;
-//
-//    @OneToMany(mappedBy = "site")
-//    @JsonIgnore
-//    private List<SensorGroup> sensorGroup;
-//
-//    @OneToMany(mappedBy = "site")
-//    @JsonIgnore
-//    private List<Schedule> schedules;
-//
-//    @OneToMany(mappedBy = "site")
-//    @JsonIgnore
-//    private List<ActuatorGroup> actuatorGroup;
-//
     @OneToMany(mappedBy = "site")
     @JsonIgnore
     private List<GroupeOnduleur> groupeOnduleurs;
 
     // Getters and Setters
-
     public Long getId() {
         return id;
     }
@@ -104,54 +79,6 @@ public class Site {
     public void setIsPrincipal(Boolean isPrincipal) {
         this.isPrincipal = isPrincipal;
     }
-
-//    public Society getSociety() {
-//        return society;
-//    }
-//
-//    public void setSociety(Society society) {
-//        this.society = society;
-//    }
-//
-//    public List<Locale> getListLocale() {
-//        return listLocale;
-//    }
-//
-//    public void setListLocale(List<Locale> listLocale) {
-//        this.listLocale = listLocale;
-//    }
-//
-//    public List<CounterGroup> getCounterGroups() {
-//        return counterGroups;
-//    }
-//
-//    public void setCounterGroups(List<CounterGroup> counterGroups) {
-//        this.counterGroups = counterGroups;
-//    }
-//
-//    public List<SensorGroup> getSensorGroup() {
-//        return sensorGroup;
-//    }
-//
-//    public void setSensorGroup(List<SensorGroup> sensorGroup) {
-//        this.sensorGroup = sensorGroup;
-//    }
-//
-//    public List<Schedule> getSchedules() {
-//        return schedules;
-//    }
-//
-//    public void setSchedules(List<Schedule> schedules) {
-//        this.schedules = schedules;
-//    }
-//
-//    public List<ActuatorGroup> getActuatorGroup() {
-//        return actuatorGroup;
-//    }
-//
-//    public void setActuatorGroup(List<ActuatorGroup> actuatorGroup) {
-//        this.actuatorGroup = actuatorGroup;
-//    }
 
     public List<GroupeOnduleur> getGroupeOnduleurs() {
         return groupeOnduleurs;

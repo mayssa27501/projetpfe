@@ -15,6 +15,6 @@ public class GroupeOnduleurEventProducer {
     }
 
     public void sendGroupeOnduleurEvent(GroupeOnduleur groupeOnduleur) {
-        kafkaTemplate.send("groupe-onduleur-events", groupeOnduleur);
+        kafkaTemplate.send("groupe-onduleur-events", groupeOnduleur.getId().toString(), groupeOnduleur);
     }
 }

@@ -8,6 +8,7 @@ import tn.esprit.projetkafka.command.service.SiteService;
 
 @RestController
 @RequestMapping("/sites")
+@CrossOrigin(origins = "http://localhost:4200")
 public class SiteController {
     private final SiteService service;
 

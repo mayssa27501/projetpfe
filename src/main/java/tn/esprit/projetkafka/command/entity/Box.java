@@ -37,6 +37,9 @@ public class Box {
     private Map<String, String> modeleAttributes = new HashMap<>();
 
     private String eventType;
+//    @ManyToOne
+//    @JoinColumn(name = "locale_id", nullable = false)
+//    private Locale locale;
 
     // Getters & Setters
     public Long getId() { return id; }
@@ -65,4 +68,12 @@ public class Box {
 
     public Map<String, String> getModeleAttributes() { return modeleAttributes; }
     public void setModeleAttributes(Map<String, String> modeleAttributes) { this.modeleAttributes = modeleAttributes; }
+//    public Locale getLocale() {
+//        return locale;
+//    }
+//
+//    public void setLocale(Locale locale) {
+//        this.locale = locale;
+//    }
+
 }

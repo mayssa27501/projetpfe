@@ -45,7 +45,7 @@ public class OnduleurEventConsumer {
         onduleurView.setBloque(onduleur.getBloque());
 
         onduleurView.setSiteId(onduleur.getSite() != null ? onduleur.getSite().getId() : null);
-        onduleurView.setLocaleId(onduleur.getLocale() != null ? onduleur.getLocale().getId() : null);
+//        onduleurView.setLocaleId(onduleur.getLocale() != null ? onduleur.getLocale().getId() : null);
         onduleurView.setBoxId(onduleur.getBox() != null ? onduleur.getBox().getId() : null);
         onduleurView.setGroupeOnduleurId(onduleur.getGroupeOnduleur() != null ? onduleur.getGroupeOnduleur().getId() : null);
 

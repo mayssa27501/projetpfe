@@ -45,7 +45,7 @@ public class OnduleurService {
         existingOnduleur.setCode(onduleur.getCode());
         existingOnduleur.setDescription(onduleur.getDescription());
         existingOnduleur.setSite(onduleur.getSite());
-        existingOnduleur.setLocale(onduleur.getLocale());
+//        existingOnduleur.setLocale(onduleur.getLocale());
         existingOnduleur.setGroupeOnduleur(onduleur.getGroupeOnduleur());
         existingOnduleur.setIndex(onduleur.getIndex());
         existingOnduleur.setDateCommunication(onduleur.getDateCommunication());

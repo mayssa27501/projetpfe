@@ -21,13 +21,14 @@ public class Locale {
 
     private String description;
 
-//    @ManyToOne
-//    @JoinColumn(name = "site_id", nullable = false)
-//    @JsonBackReference
-//    private Site site;
+    // @ManyToOne
+    // @JoinColumn(name = "site_id", nullable = false)
+    // @JsonBackReference
+    // private Site site;
 
-    @OneToMany(mappedBy = "locale", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private List<Onduleur> onduleurs = new ArrayList<>();
+    // Commenter la relation avec Onduleur
+    // @OneToMany(mappedBy = "locale", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    // private List<Onduleur> onduleurs = new ArrayList<>();
 
     // Getters & Setters
     public Long getId() { return id; }
@@ -41,14 +42,14 @@ public class Locale {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-//
-//    public Site getSite() { return site; }
-//    public void setSite(Site site) { this.site = site; }
 
-    public List<Onduleur> getOnduleurs() { return onduleurs; }
-    public void setOnduleurs(List<Onduleur> onduleurs) {
-        this.onduleurs = onduleurs;
-    }
+    // @Override
+    // public Site getSite() { return site; }
+    // public void setSite(Site site) { this.site = site; }
+
+    // Commenter les getters/setters pour Onduleur
+    // public List<Onduleur> getOnduleurs() { return onduleurs; }
+    // public void setOnduleurs(List<Onduleur> onduleurs) { this.onduleurs = onduleurs; }
 
     // Equals and HashCode for entity comparison
     @Override

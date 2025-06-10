@@ -1,5 +1,6 @@
 package tn.esprit.projetkafka.command.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -19,16 +20,17 @@ public class Onduleur {
     @ManyToOne
     private Site site;
 
-    @ManyToOne
-    @JoinColumn(name = "locale_id")
-    private Locale locale;
+//    @ManyToOne
+//    @JoinColumn(name = "locale_id")
+//    private Locale locale;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "box_id")
     private Box box;
 
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne
     @JoinColumn(name = "groupe_onduleur_id")
+    @JsonBackReference
     private GroupeOnduleur groupeOnduleur;
 
     @Column(name = "onduleur_index")
@@ -56,9 +58,9 @@ public class Onduleur {
 
     public Site getSite() { return site; }
     public void setSite(Site site) { this.site = site; }
-
-    public Locale getLocale() { return locale; }
-    public void setLocale(Locale locale) { this.locale = locale; }
+//
+//    public Locale getLocale() { return locale; }
+//    public void setLocale(Locale locale) { this.locale = locale; }
 
     public Box getBox() { return box; }
     public void setBox(Box box) { this.box = box; }
