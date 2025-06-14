@@ -100,7 +100,12 @@ export const appRoutes: Route[] = [
                     loadChildren: () =>
                       import('app/modules/admin/dashboards/ajouter-groupe-onduleur/ajouter-groupe-onduleur.routes').then(m => m.AJOUTER_GROUPE_ONDULEUR_ROUTES)
                 },
-          { path: 'ajoutersite', loadChildren: () => import('app/modules/admin/dashboards/ajouter-site/ajouter-site.routes').then(m => m.AJOUTER_SITE_ROUTES) }
+          { path: 'ajoutersite', loadChildren: () => import('app/modules/admin/dashboards/ajouter-site/ajouter-site.routes').then(m => m.AJOUTER_SITE_ROUTES) },
+          {
+            path: 'ajouterlocale',
+            loadChildren: () =>
+                import('app/modules/admin/dashboards/ajouter-locale/ajouter-locale.routes').then(m => m.AJOUTERLOCALE_ROUTES)
+}
             ]},
 
             // Apps
