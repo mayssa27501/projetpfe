@@ -1,4 +1,3 @@
-
 <!-- Overlay -->
 <div class="overlay" *ngIf="formVisible || showDetails" (click)="toggleForm(); closeDetails()"></div>
 
@@ -81,12 +80,12 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Date de Communication</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="dateCommunication" required />
+              <mat-label>Date de Création</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="dateCreation" required />
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
-              <mat-error *ngIf="onduleurForm.get('dateCommunication')?.hasError('required')">
-                La date de communication est requise
+              <mat-error *ngIf="onduleurForm.get('dateCreation')?.hasError('required')">
+                La date de création est requise
               </mat-error>
             </mat-form-field>
 
@@ -120,6 +119,66 @@
               </mat-error>
               <mat-error *ngIf="onduleurForm.get('productionKwh')?.hasError('min')">
                 La production doit être supérieure ou égale à 0
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Adresse IP</mat-label>
+              <input matInput type="text" formControlName="adresse" />
+              <mat-error *ngIf="onduleurForm.get('adresse')?.hasError('pattern')">
+                Format d'adresse IP invalide
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Court</mat-label>
+              <input matInput type="text" formControlName="court" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Communication</mat-label>
+              <mat-select formControlName="communication" required>
+                <mat-option value="modbus TCP">Modbus TCP</mat-option>
+                <mat-option value="modbus RTU">Modbus RTU</mat-option>
+                <!-- Add more options as needed -->
+              </mat-select>
+              <mat-error *ngIf="onduleurForm.get('communication')?.hasError('required')">
+                La communication est requise
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Modèle Onduleur</mat-label>
+              <mat-select formControlName="modeleOnduleur" required>
+                <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele">
+                  {{ modele }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="onduleurForm.get('modeleOnduleur')?.hasError('required')">
+                Le modèle est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type" required>
+                <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="onduleurForm.get('type')?.hasError('required')">
+                Le type est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Multiplicateur</mat-label>
+              <input matInput type="number" formControlName="multiplicateur" required step="1" />
+              <mat-error *ngIf="onduleurForm.get('multiplicateur')?.hasError('required')">
+                Le multiplicateur est requis
+              </mat-error>
+              <mat-error *ngIf="onduleurForm.get('multiplicateur')?.hasError('min')">
+                Le multiplicateur doit être supérieur ou égal à 1
               </mat-error>
             </mat-form-field>
 
@@ -233,12 +292,12 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date de Communication</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="dateCommunication" required />
+          <mat-label>Date de Création</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="dateCreation" required />
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
-          <mat-error *ngIf="onduleurForm.get('dateCommunication')?.hasError('required')">
-            La date de communication est requise
+          <mat-error *ngIf="onduleurForm.get('dateCreation')?.hasError('required')">
+            La date de création est requise
           </mat-error>
         </mat-form-field>
 
@@ -272,6 +331,66 @@
           </mat-error>
           <mat-error *ngIf="onduleurForm.get('productionKwh')?.hasError('min')">
             La production doit être supérieure ou égale à 0
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Adresse IP</mat-label>
+          <input matInput type="text" formControlName="adresse" />
+          <mat-error *ngIf="onduleurForm.get('adresse')?.hasError('pattern')">
+            Format d'adresse IP invalide
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Court</mat-label>
+          <input matInput type="text" formControlName="court" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Communication</mat-label>
+          <mat-select formControlName="communication" required>
+            <mat-option value="modbus TCP">Modbus TCP</mat-option>
+            <mat-option value="modbus RTU">Modbus RTU</mat-option>
+            <!-- Add more options as needed -->
+          </mat-select>
+          <mat-error *ngIf="onduleurForm.get('communication')?.hasError('required')">
+            La communication est requise
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Modèle Onduleur</mat-label>
+          <mat-select formControlName="modeleOnduleur" required>
+            <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele">
+              {{ modele }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="onduleurForm.get('modeleOnduleur')?.hasError('required')">
+            Le modèle est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type" required>
+            <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="onduleurForm.get('type')?.hasError('required')">
+            Le type est requis
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Multiplicateur</mat-label>
+          <input matInput type="number" formControlName="multiplicateur" required step="1" />
+          <mat-error *ngIf="onduleurForm.get('multiplicateur')?.hasError('required')">
+            Le multiplicateur est requis
+          </mat-error>
+          <mat-error *ngIf="onduleurForm.get('multiplicateur')?.hasError('min')">
+            Le multiplicateur doit être supérieur ou égal à 1
           </mat-error>
         </mat-form-field>
 
@@ -321,6 +440,7 @@
           <th>Site</th>
           <th>Locale</th>
           <th>Box</th>
+          <th>Modèle</th>
           <th>Bloqué</th>
           <th>Actions</th>
         </tr>
@@ -332,6 +452,7 @@
           <td (click)="editOnduleur(onduleur)">{{ onduleur.site.name }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.locale.name }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.box.code }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.modeleOnduleur }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.bloque ? 'Oui' : 'Non' }}</td>
           <td>
             <button mat-icon-button color="warn" class="debug-button" (click)="deleteOnduleur(onduleur.id, $event)">
@@ -364,10 +485,16 @@
     <p><strong>Locale :</strong> {{ selectedOnduleurForDetails?.locale?.name || 'N/A' }}</p>
     <p><strong>Box :</strong> {{ selectedOnduleurForDetails?.box?.code || 'N/A' }}</p>
     <p><strong>Index :</strong> {{ selectedOnduleurForDetails?.index || 'N/A' }}</p>
-    <p><strong>Date de Communication :</strong> {{ selectedOnduleurForDetails?.dateCommunication | date:'shortDate' || 'N/A' }}</p>
+    <p><strong>Date de Création :</strong> {{ selectedOnduleurForDetails?.dateCreation | date:'shortDate' || 'N/A' }}</p>
     <p><strong>Heure :</strong> {{ selectedOnduleurForDetails?.heure || 'N/A' }}</p>
     <p><strong>Consommation (kWh) :</strong> {{ selectedOnduleurForDetails?.consommationKwh || 'N/A' }}</p>
     <p><strong>Production (kWh) :</strong> {{ selectedOnduleurForDetails?.productionKwh || 'N/A' }}</p>
+    <p><strong>Adresse IP :</strong> {{ selectedOnduleurForDetails?.adresse || 'N/A' }}</p>
+    <p><strong>Court :</strong> {{ selectedOnduleurForDetails?.court || 'N/A' }}</p>
+    <p><strong>Communication :</strong> {{ selectedOnduleurForDetails?.communication || 'N/A' }}</p>
+    <p><strong>Modèle Onduleur :</strong> {{ selectedOnduleurForDetails?.modeleOnduleur || 'N/A' }}</p>
+    <p><strong>Type :</strong> {{ selectedOnduleurForDetails?.type || 'N/A' }}</p>
+    <p><strong>Multiplicateur :</strong> {{ selectedOnduleurForDetails?.multiplicateur || 'N/A' }}</p>
     <p><strong>Bloqué :</strong> {{ selectedOnduleurForDetails?.bloque ? 'Oui' : 'Non' }}</p>
   </div>
 </div>

@@ -256,6 +256,10 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   showDetails: boolean = false;
   selectedOnduleurForDetails: any = null;
 
+  // Enum options for modeleOnduleur and type
+  modeleOnduleurOptions: string[] = ['UNO_DM_5_0']; // Add more as needed
+  typeOnduleurOptions: string[] = ['ONDULEUR_SOLAIRE']; // Add more as needed
+
   constructor(
     private fb: FormBuilder,
     private ajouterOnduleurService: AjouterOnduleurService,
@@ -264,14 +268,20 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     this.onduleurForm = this.fb.group({
       code: ['', [Validators.required]],
       description: ['', [Validators.required]],
-      siteId: [''], // Non obligatoire
-      localeId: [''], // Non obligatoire
-      boxId: [''], // Non obligatoire
+      siteId: [''], // Optional
+      localeId: [''], // Optional
+      boxId: [''], // Optional
       index: ['', [Validators.required, Validators.min(0)]],
-      dateCommunication: ['', [Validators.required]],
+      dateCreation: ['', [Validators.required]],
       heure: ['', [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]],
       consommationKwh: ['', [Validators.required, Validators.min(0)]],
       productionKwh: ['', [Validators.required, Validators.min(0)]],
+      adresse: ['', [Validators.pattern(/^(\d{1,3}\.){3}\d{1,3}$/)]], // Optional, IP format
+      court: [''], // Optional
+      communication: ['', [Validators.required]], // Required
+      modeleOnduleur: ['', [Validators.required]], // Required
+      type: ['', [Validators.required]], // Required
+      multiplicateur: ['', [Validators.required, Validators.min(1)]], // Required
       bloque: [false]
     });
     this.basicInfoForm = this.fb.group({
@@ -318,7 +328,13 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
           box: {
             id: onduleur.boxId || onduleur.box?.id,
             code: onduleur.boxCode || this.boxes.find(b => b.id === (onduleur.boxId || onduleur.box?.id))?.code || 'N/A'
-          }
+          },
+          adresse: onduleur.adresse || 'N/A',
+          court: onduleur.court || 'N/A',
+          communication: onduleur.communication || 'N/A',
+          modeleOnduleur: onduleur.modeleOnduleur || 'N/A',
+          type: onduleur.type || 'ONDULEUR_SOLAIRE',
+          multiplicateur: onduleur.multiplicateur || 1
         }));
         console.log('Onduleurs loaded:', this.onduleurs);
         console.log('Onduleurs count:', this.onduleurs.length);
@@ -348,7 +364,6 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         console.error('Error loading sites:', err);
         this.errorMessage = 'Échec du chargement des sites: ' + (err.message || 'Erreur inconnue');
         this.sites = [];
-        this.isLoading = false;
         this.loadOnduleurs();
       }
     });
@@ -402,10 +417,16 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
       localeId: onduleur.locale?.id || onduleur.localeId || '',
       boxId: onduleur.box?.id || onduleur.boxId || '',
       index: onduleur.index || '',
-      dateCommunication: onduleur.dateCommunication || '',
+      dateCreation: onduleur.dateCreation || '',
       heure: onduleur.heure || '',
       consommationKwh: onduleur.consommationKwh || '',
       productionKwh: onduleur.productionKwh || '',
+      adresse: onduleur.adresse || '',
+      court: onduleur.court || '',
+      communication: onduleur.communication || '',
+      modeleOnduleur: onduleur.modeleOnduleur || '',
+      type: onduleur.type || '',
+      multiplicateur: onduleur.multiplicateur || '',
       bloque: onduleur.bloque || false
     });
     this.basicInfoForm.patchValue({
@@ -465,10 +486,16 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         locale: form.value.localeId ? { id: form.value.localeId } : null,
         box: form.value.boxId ? { id: form.value.boxId } : null,
         index: form.value.index,
-        dateCommunication: form.value.dateCommunication,
+        dateCreation: form.value.dateCreation,
         heure: form.value.heure,
         consommationKwh: form.value.consommationKwh,
         productionKwh: form.value.productionKwh,
+        adresse: form.value.adresse || null,
+        court: form.value.court || null,
+        communication: form.value.communication,
+        modeleOnduleur: form.value.modeleOnduleur,
+        type: form.value.type,
+        multiplicateur: form.value.multiplicateur,
         bloque: form.value.bloque
       };
     } else {
@@ -482,10 +509,16 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         locale: onduleur?.locale || (this.onduleurForm.value.localeId ? { id: this.onduleurForm.value.localeId } : null),
         box: onduleur?.box || (this.onduleurForm.value.boxId ? { id: this.onduleurForm.value.boxId } : null),
         index: onduleur?.index || this.onduleurForm.value.index,
-        dateCommunication: onduleur?.dateCommunication || this.onduleurForm.value.dateCommunication,
+        dateCreation: onduleur?.dateCreation || this.onduleurForm.value.dateCreation,
         heure: onduleur?.heure || this.onduleurForm.value.heure,
         consommationKwh: onduleur?.consommationKwh || this.onduleurForm.value.consommationKwh,
         productionKwh: onduleur?.productionKwh || this.onduleurForm.value.productionKwh,
+        adresse: onduleur?.adresse || this.onduleurForm.value.adresse,
+        court: onduleur?.court || this.onduleurForm.value.court,
+        communication: onduleur?.communication || this.onduleurForm.value.communication,
+        modeleOnduleur: onduleur?.modeleOnduleur || this.onduleurForm.value.modeleOnduleur,
+        type: onduleur?.type || this.onduleurForm.value.type,
+        multiplicateur: onduleur?.multiplicateur || this.onduleurForm.value.multiplicateur,
         bloque: form.value.bloque
       };
     }
@@ -525,7 +558,13 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
                 box: {
                   id: updatedOnduleur.box?.id || formData.box?.id,
                   code: updatedOnduleur.box?.code || selectedBox?.code || this.onduleurs[index].boxCode || 'N/A'
-                }
+                },
+                adresse: updatedOnduleur.adresse || formData.adresse,
+                court: updatedOnduleur.court || formData.court,
+                communication: updatedOnduleur.communication || formData.communication,
+                modeleOnduleur: updatedOnduleur.modeleOnduleur || formData.modeleOnduleur,
+                type: updatedOnduleur.type || formData.type,
+                multiplicateur: updatedOnduleur.multiplicateur || formData.multiplicateur
               };
               console.log('Updated onduleur in table:', JSON.stringify(this.onduleurs[index], null, 2));
             }
@@ -564,7 +603,13 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
               box: {
                 id: newOnduleur.box?.id || formData.box?.id,
                 code: newOnduleur.box?.code || selectedBox?.code || 'N/A'
-              }
+              },
+              adresse: newOnduleur.adresse || formData.adresse,
+              court: newOnduleur.court || formData.court,
+              communication: newOnduleur.communication || formData.communication,
+              modeleOnduleur: newOnduleur.modeleOnduleur || formData.modeleOnduleur,
+              type: newOnduleur.type || formData.type,
+              multiplicateur: newOnduleur.multiplicateur || formData.multiplicateur
             });
             this.resetForms();
             this.isLoading = false;
@@ -598,10 +643,16 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
       localeId: '',
       boxId: '',
       index: '',
-      dateCommunication: '',
+      dateCreation: '',
       heure: '',
       consommationKwh: '',
       productionKwh: '',
+      adresse: '',
+      court: '',
+      communication: '',
+      modeleOnduleur: '',
+      type: '',
+      multiplicateur: '',
       bloque: false
     });
     this.basicInfoForm.reset({
