@@ -1,6 +1,6 @@
 package tn.esprit.projetkafka.command.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,43 +21,68 @@ public class Locale {
 
     private String description;
 
-    // @ManyToOne
-    // @JoinColumn(name = "site_id", nullable = false)
-    // @JsonBackReference
-    // private Site site;
+    private Boolean blocked;
 
-    // Commenter la relation avec Onduleur
-    // @OneToMany(mappedBy = "locale", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    // private List<Onduleur> onduleurs = new ArrayList<>();
+    @OneToMany(mappedBy = "locale", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JsonIgnore
+    private List<Box> boxes = new ArrayList<>();
 
     // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getCode() {
+        return code;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    // @Override
-    // public Site getSite() { return site; }
-    // public void setSite(Site site) { this.site = site; }
+    public String getName() {
+        return name;
+    }
 
-    // Commenter les getters/setters pour Onduleur
-    // public List<Onduleur> getOnduleurs() { return onduleurs; }
-    // public void setOnduleurs(List<Onduleur> onduleurs) { this.onduleurs = onduleurs; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    // Equals and HashCode for entity comparison
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public List<Box> getBoxes() {
+        return boxes;
+    }
+
+    public void setBoxes(List<Box> boxes) {
+        this.boxes = boxes;
+    }
+
+    // Equals and HashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Locale that = (Locale) o;
-        return Objects.equals(id, that.id) && Objects.equals(code, that.code);
+        Locale locale = (Locale) o;
+        return Objects.equals(id, locale.id) && Objects.equals(code, locale.code);
     }
 
     @Override

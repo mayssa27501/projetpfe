@@ -27,7 +27,7 @@ public class Box {
     private Boolean isBlocked;
 
     @OneToMany(mappedBy = "box")
-    private List<BoxCommand> boxCommands;
+    private List<BoxCommand> boxCommands = new ArrayList<>();
 
     @ElementCollection
     @MapKeyColumn(name = "attribute_key")
@@ -37,43 +37,89 @@ public class Box {
     private Map<String, String> modeleAttributes = new HashMap<>();
 
     private String eventType;
-//    @ManyToOne
-//    @JoinColumn(name = "locale_id", nullable = false)
-//    private Locale locale;
+
+    @ManyToOne
+    @JoinColumn(name = "locale_id")
+    private Locale locale;
 
     // Getters & Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getSerialNumber() { return serialNumber; }
-    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+    public String getCode() {
+        return code;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    public Modele getModele() { return modele; }
-    public void setModele(Modele modele) { this.modele = modele; }
+    public String getSerialNumber() {
+        return serialNumber;
+    }
 
-    public Boolean getIsBlocked() { return isBlocked; }
-    public void setIsBlocked(Boolean isBlocked) { this.isBlocked = isBlocked; }
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
 
-    public List<BoxCommand> getBoxCommands() { return boxCommands; }
-    public void setBoxCommands(List<BoxCommand> boxCommands) { this.boxCommands = boxCommands; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getEventType() { return eventType; }
-    public void setEventType(String eventType) { this.eventType = eventType; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public Map<String, String> getModeleAttributes() { return modeleAttributes; }
-    public void setModeleAttributes(Map<String, String> modeleAttributes) { this.modeleAttributes = modeleAttributes; }
-//    public Locale getLocale() {
-//        return locale;
-//    }
-//
-//    public void setLocale(Locale locale) {
-//        this.locale = locale;
-//    }
+    public Modele getModele() {
+        return modele;
+    }
 
+    public void setModele(Modele modele) {
+        this.modele = modele;
+    }
+
+    public Boolean getIsBlocked() {
+        return isBlocked;
+    }
+
+    public void setIsBlocked(Boolean isBlocked) {
+        this.isBlocked = isBlocked;
+    }
+
+    public List<BoxCommand> getBoxCommands() {
+        return boxCommands;
+    }
+
+    public void setBoxCommands(List<BoxCommand> boxCommands) {
+        this.boxCommands = boxCommands;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public Map<String, String> getModeleAttributes() {
+        return modeleAttributes;
+    }
+
+    public void setModeleAttributes(Map<String, String> modeleAttributes) {
+        this.modeleAttributes = modeleAttributes;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 }
