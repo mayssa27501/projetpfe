@@ -30,10 +30,9 @@ public class OnduleurService {
                 throw new RuntimeException("Box with id " + onduleur.getBox().getId() + " not found");
             }
         } else if (onduleur.getBox() != null && onduleur.getBox().getId() == null) {
-            // Persist new Box if provided
             boxRepository.save(onduleur.getBox());
         } else {
-            onduleur.setBox(null); // No box associated
+            onduleur.setBox(null);
         }
         return onduleurRepository.save(onduleur);
     }
@@ -45,21 +44,25 @@ public class OnduleurService {
         existingOnduleur.setCode(onduleur.getCode());
         existingOnduleur.setDescription(onduleur.getDescription());
         existingOnduleur.setSite(onduleur.getSite());
-//        existingOnduleur.setLocale(onduleur.getLocale());
         existingOnduleur.setGroupeOnduleur(onduleur.getGroupeOnduleur());
         existingOnduleur.setIndex(onduleur.getIndex());
-        existingOnduleur.setDateCommunication(onduleur.getDateCommunication());
+        existingOnduleur.setDateCreation(onduleur.getDateCreation());
         existingOnduleur.setHeure(onduleur.getHeure());
         existingOnduleur.setConsommationKwh(onduleur.getConsommationKwh());
         existingOnduleur.setProductionKwh(onduleur.getProductionKwh());
         existingOnduleur.setBloque(onduleur.getBloque());
+        existingOnduleur.setAdresse(onduleur.getAdresse());
+        existingOnduleur.setCourt(onduleur.getCourt());
+        existingOnduleur.setCommunication(onduleur.getCommunication());
+        existingOnduleur.setModeleOnduleur(onduleur.getModeleOnduleur());
+        existingOnduleur.setType(onduleur.getType());
+        existingOnduleur.setMultiplicateur(onduleur.getMultiplicateur());
 
         if (onduleur.getBox() != null && onduleur.getBox().getId() != null) {
             Box box = boxRepository.findById(onduleur.getBox().getId())
                     .orElseThrow(() -> new RuntimeException("Box with id " + onduleur.getBox().getId() + " not found"));
             existingOnduleur.setBox(box);
         } else if (onduleur.getBox() != null && onduleur.getBox().getId() == null) {
-            // Persist new Box if provided
             boxRepository.save(onduleur.getBox());
             existingOnduleur.setBox(onduleur.getBox());
         } else {

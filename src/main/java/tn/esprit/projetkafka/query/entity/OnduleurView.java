@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import java.time.LocalDate;
 
 @Table(name = "onduleur_view")
+@Document
 public class OnduleurView {
 
     @Id
@@ -31,8 +32,8 @@ public class OnduleurView {
     @JsonProperty("index")
     private Integer index;
 
-    @JsonProperty("dateCommunication")
-    private LocalDate dateCommunication;
+    @JsonProperty("dateCreation")
+    private LocalDate dateCreation;
 
     @JsonProperty("heure")
     private String heure;
@@ -45,6 +46,24 @@ public class OnduleurView {
 
     @JsonProperty("bloque")
     private Boolean bloque;
+
+    @JsonProperty("adresse")
+    private String adresse;
+
+    @JsonProperty("court")
+    private String court;
+
+    @JsonProperty("communication")
+    private String communication;
+
+    @JsonProperty("modeleOnduleur")
+    private String modeleOnduleur;
+
+    @JsonProperty("type")
+    private String type;
+
+    @JsonProperty("multiplicateur")
+    private Integer multiplicateur;
 
     @JsonProperty("groupeOnduleurId")
     private Long groupeOnduleurId;
@@ -71,8 +90,8 @@ public class OnduleurView {
     public Integer getIndex() { return index; }
     public void setIndex(Integer index) { this.index = index; }
 
-    public LocalDate getDateCommunication() { return dateCommunication; }
-    public void setDateCommunication(LocalDate dateCommunication) { this.dateCommunication = dateCommunication; }
+    public LocalDate getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDate dateCreation) { this.dateCreation = dateCreation; }
 
     public String getHeure() { return heure; }
     public void setHeure(String heure) { this.heure = heure; }
@@ -85,6 +104,24 @@ public class OnduleurView {
 
     public Boolean getBloque() { return bloque; }
     public void setBloque(Boolean bloque) { this.bloque = bloque; }
+
+    public String getAdresse() { return adresse; }
+    public void setAdresse(String adresse) { this.adresse = adresse; }
+
+    public String getCourt() { return court; }
+    public void setCourt(String court) { this.court = court; }
+
+    public String getCommunication() { return communication; }
+    public void setCommunication(String communication) { this.communication = communication; }
+
+    public String getModeleOnduleur() { return modeleOnduleur; }
+    public void setModeleOnduleur(String modeleOnduleur) { this.modeleOnduleur = modeleOnduleur; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public Integer getMultiplicateur() { return multiplicateur; }
+    public void setMultiplicateur(Integer multiplicateur) { this.multiplicateur = multiplicateur; }
 
     public Long getGroupeOnduleurId() { return groupeOnduleurId; }
     public void setGroupeOnduleurId(Long groupeOnduleurId) { this.groupeOnduleurId = groupeOnduleurId; }

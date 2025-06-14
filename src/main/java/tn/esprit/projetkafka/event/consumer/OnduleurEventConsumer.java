@@ -38,14 +38,19 @@ public class OnduleurEventConsumer {
         onduleurView.setCode(onduleur.getCode());
         onduleurView.setDescription(onduleur.getDescription());
         onduleurView.setIndex(onduleur.getIndex());
-        onduleurView.setDateCommunication(onduleur.getDateCommunication());
+        onduleurView.setDateCreation(onduleur.getDateCreation());
         onduleurView.setHeure(onduleur.getHeure());
         onduleurView.setConsommationKwh(onduleur.getConsommationKwh());
         onduleurView.setProductionKwh(onduleur.getProductionKwh());
         onduleurView.setBloque(onduleur.getBloque());
+        onduleurView.setAdresse(onduleur.getAdresse());
+        onduleurView.setCourt(onduleur.getCourt());
+        onduleurView.setCommunication(onduleur.getCommunication());
+        onduleurView.setModeleOnduleur(onduleur.getModeleOnduleur() != null ? onduleur.getModeleOnduleur().name() : null);
+        onduleurView.setType(onduleur.getType() != null ? onduleur.getType().name() : null);
+        onduleurView.setMultiplicateur(onduleur.getMultiplicateur());
 
         onduleurView.setSiteId(onduleur.getSite() != null ? onduleur.getSite().getId() : null);
-//        onduleurView.setLocaleId(onduleur.getLocale() != null ? onduleur.getLocale().getId() : null);
         onduleurView.setBoxId(onduleur.getBox() != null ? onduleur.getBox().getId() : null);
         onduleurView.setGroupeOnduleurId(onduleur.getGroupeOnduleur() != null ? onduleur.getGroupeOnduleur().getId() : null);
 
