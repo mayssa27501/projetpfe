@@ -11,7 +11,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AjouterOnduleurService } from './ajouter-onduleur.service';
+import { GroupeOnduleurService } from '../ajouter-groupe-onduleur/groupe-onduleur.service';
+import { GroupFormDialogComponent } from './group-form-dialog.component';
 
 @Component({
   selector: 'app-ajouter-onduleur',
@@ -162,6 +165,8 @@ import { AjouterOnduleurService } from './ajouter-onduleur.service';
     }
     button[mat-flat-button][color="primary"],
     button[mat-stroked-button][color="primary"],
+    button[mat-flat-button][color="accent"],
+    button[mat-stroked-button][color="accent"],
     button[mat-flat-button][color="warn"],
     button[mat-stroked-button][color="warn"],
     button[mat-icon-button][color="warn"] {
@@ -225,6 +230,66 @@ import { AjouterOnduleurService } from './ajouter-onduleur.service';
         width: 90%;
       }
     }
+    .group-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .group-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .group-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .card-header {
+      background: linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .card-title {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+    .card-body {
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    .card-body p {
+      margin: 0.5rem 0;
+    }
+    .card-body strong {
+      color: #1f2937;
+    }
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.5rem 1rem;
+      background: #f9fafb;
+    }
+    .onduleur-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .onduleur-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .onduleur-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
   `],
   imports: [
     CommonModule,
@@ -238,7 +303,8 @@ import { AjouterOnduleurService } from './ajouter-onduleur.service';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatDialogModule
   ]
 })
 export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
@@ -248,40 +314,45 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   sites: any[] = [];
   locales: any[] = [];
   boxes: any[] = [];
+  groupeOnduleurs: any[] = [];
   formVisible: boolean = false;
+  showGroupDrawer: boolean = false;
   selectedOnduleurId: number | null = null;
   isEditMode: boolean = false;
   isLoading: boolean = false;
+  isLoadingGroups: boolean = false;
   errorMessage: string = '';
+  groupErrorMessage: string = '';
   showDetails: boolean = false;
   selectedOnduleurForDetails: any = null;
-
-  // Enum options for modeleOnduleur and type
-  modeleOnduleurOptions: string[] = ['UNO_DM_5_0']; // Add more as needed
-  typeOnduleurOptions: string[] = ['ONDULEUR_SOLAIRE']; // Add more as needed
+  selectedGroupeOnduleurForDetails: any = null;
+  modeleOnduleurOptions: string[] = ['Modèle A', 'Modèle B', 'Modèle C']; // Example options
+  typeOnduleurOptions: string[] = ['Type 1', 'Type 2', 'Type 3']; // Example options
 
   constructor(
     private fb: FormBuilder,
     private ajouterOnduleurService: AjouterOnduleurService,
-    private cdr: ChangeDetectorRef
+    private groupeOnduleurService: GroupeOnduleurService,
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.onduleurForm = this.fb.group({
       code: ['', [Validators.required]],
       description: ['', [Validators.required]],
-      siteId: [''], // Optional
-      localeId: [''], // Optional
-      boxId: [''], // Optional
+      siteId: [''],
+      localeId: [''],
+      boxId: [''],
       index: ['', [Validators.required, Validators.min(0)]],
       dateCreation: ['', [Validators.required]],
       heure: ['', [Validators.required, Validators.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)]],
       consommationKwh: ['', [Validators.required, Validators.min(0)]],
       productionKwh: ['', [Validators.required, Validators.min(0)]],
-      adresse: ['', [Validators.pattern(/^(\d{1,3}\.){3}\d{1,3}$/)]], // Optional, IP format
-      court: [''], // Optional
-      communication: ['', [Validators.required]], // Required
-      modeleOnduleur: ['', [Validators.required]], // Required
-      type: ['', [Validators.required]], // Required
-      multiplicateur: ['', [Validators.required, Validators.min(1)]], // Required
+      adresse: ['', [Validators.pattern(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)]],
+      court: [''],
+      communication: ['', [Validators.required]],
+      modeleOnduleur: ['', [Validators.required]],
+      type: ['', [Validators.required]],
+      multiplicateur: ['', [Validators.required, Validators.min(1)]],
       bloque: [false]
     });
     this.basicInfoForm = this.fb.group({
@@ -296,11 +367,11 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     this.loadSites();
     this.loadLocales();
     this.loadBoxes();
+    this.loadGroupeOnduleurs();
   }
 
   ngAfterViewInit(): void {
     console.log('ngAfterViewInit called');
-    console.log('Form visible:', this.formVisible, 'Edit mode:', this.isEditMode);
     setTimeout(() => {
       console.log('Forcing change detection after 500ms');
       const buttons = document.querySelectorAll('.debug-button');
@@ -328,13 +399,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
           box: {
             id: onduleur.boxId || onduleur.box?.id,
             code: onduleur.boxCode || this.boxes.find(b => b.id === (onduleur.boxId || onduleur.box?.id))?.code || 'N/A'
-          },
-          adresse: onduleur.adresse || 'N/A',
-          court: onduleur.court || 'N/A',
-          communication: onduleur.communication || 'N/A',
-          modeleOnduleur: onduleur.modeleOnduleur || 'N/A',
-          type: onduleur.type || 'ONDULEUR_SOLAIRE',
-          multiplicateur: onduleur.multiplicateur || 1
+          }
         }));
         console.log('Onduleurs loaded:', this.onduleurs);
         console.log('Onduleurs count:', this.onduleurs.length);
@@ -364,6 +429,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         console.error('Error loading sites:', err);
         this.errorMessage = 'Échec du chargement des sites: ' + (err.message || 'Erreur inconnue');
         this.sites = [];
+        this.isLoading = false;
         this.loadOnduleurs();
       }
     });
@@ -376,11 +442,13 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         this.locales = data;
         console.log('Locales loaded:', data);
         console.log('Locales count:', this.locales.length);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading locales:', err);
         this.errorMessage = 'Échec du chargement des locales: ' + (err.message || 'Erreur inconnue');
         this.locales = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -392,11 +460,40 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         this.boxes = data;
         console.log('Boxes loaded:', data);
         console.log('Boxes count:', this.boxes.length);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading boxes:', err);
         this.errorMessage = 'Échec du chargement des boxes: ' + (err.message || 'Erreur inconnue');
         this.boxes = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadGroupeOnduleurs(): void {
+    this.isLoadingGroups = true;
+    this.groupErrorMessage = '';
+    console.log('Loading groupe onduleurs...');
+    this.groupeOnduleurService.getGroupeOnduleurs().subscribe({
+      next: (data) => {
+        this.groupeOnduleurs = data.map(groupe => ({
+          ...groupe,
+          site: {
+            id: groupe.siteId || groupe.site?.id,
+            name: groupe.siteName || this.sites.find(s => s.id === (groupe.siteId || groupe.site?.id))?.name || 'N/A'
+          }
+        }));
+        console.log('Groupe onduleurs loaded:', this.groupeOnduleurs);
+        console.log('Groupe onduleurs count:', this.groupeOnduleurs.length);
+        this.isLoadingGroups = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading groupe onduleurs:', err);
+        this.groupErrorMessage = 'Échec du chargement des groupes onduleurs: ' + (err.message || 'Erreur inconnue');
+        this.isLoadingGroups = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -404,8 +501,68 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   toggleForm(): void {
     this.resetForms();
     this.formVisible = !this.formVisible;
+    this.showGroupDrawer = false;
     console.log('Form visible:', this.formVisible);
     this.cdr.detectChanges();
+  }
+
+  toggleGroupDrawer(): void {
+    this.showGroupDrawer = !this.showGroupDrawer;
+    this.formVisible = false;
+    this.showDetails = false;
+    console.log('Group drawer visible:', this.showGroupDrawer);
+    if (this.showGroupDrawer) {
+      this.loadGroupeOnduleurs();
+    }
+    this.cdr.detectChanges();
+  }
+
+  closeAllPanels(): void {
+    this.formVisible = false;
+    this.showGroupDrawer = false;
+    this.showDetails = false;
+    this.resetForms();
+    this.cdr.detectChanges();
+  }
+
+  openGroupFormDialog(groupe?: any): void {
+    const dialogRef = this.dialog.open(GroupFormDialogComponent, {
+      width: '600px',
+      data: {
+        groupe: groupe,
+        sites: this.sites,
+        onduleurs: this.onduleurs,
+        isEditMode: !!groupe
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (groupe) {
+          // Update existing group
+          const index = this.groupeOnduleurs.findIndex(g => g.id === result.id);
+          if (index !== -1) {
+            this.groupeOnduleurs[index] = {
+              ...result,
+              site: {
+                id: result.site?.id,
+                name: this.sites.find(s => s.id === result.site?.id)?.name || 'N/A'
+              }
+            };
+          }
+        } else {
+          // Add new group
+          this.groupeOnduleurs.push({
+            ...result,
+            site: {
+              id: result.site?.id,
+              name: this.sites.find(s => s.id === result.site?.id)?.name || 'N/A'
+            }
+          });
+        }
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   editOnduleur(onduleur: any): void {
@@ -437,9 +594,14 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     this.selectedOnduleurId = onduleur.id;
     this.isEditMode = true;
     this.formVisible = true;
+    this.showGroupDrawer = false;
     console.log('OnduleurForm validity after patch:', this.onduleurForm.valid);
     console.log('OnduleurForm values:', this.onduleurForm.value);
     this.cdr.detectChanges();
+  }
+
+  editGroup(groupe: any): void {
+    this.openGroupFormDialog(groupe);
   }
 
   deleteOnduleur(id: number, event: MouseEvent): void {
@@ -459,9 +621,36 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     });
   }
 
+  deleteGroup(id: number, event: MouseEvent): void {
+    event.stopPropagation();
+    console.log('Deleting groupe onduleur:', id);
+    this.groupeOnduleurService.deleteGroupeOnduleur(id).subscribe({
+      next: () => {
+        this.groupeOnduleurs = this.groupeOnduleurs.filter(groupe => groupe.id !== id);
+        console.log('Groupe onduleur deleted:', id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error deleting groupe onduleur:', err);
+        this.groupErrorMessage = 'Échec de la suppression du groupe onduleur: ' + (err.message || 'Erreur inconnue');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   showOnduleurDetails(onduleur: any): void {
     console.log('Showing details for onduleur:', JSON.stringify(onduleur, null, 2));
     this.selectedOnduleurForDetails = onduleur;
+    this.selectedGroupeOnduleurForDetails = null;
+    this.showDetails = true;
+    this.showGroupDrawer = false;
+    this.cdr.detectChanges();
+  }
+
+  showGroupeOnduleurDetails(groupe: any): void {
+    console.log('Showing details for groupe onduleur:', JSON.stringify(groupe, null, 2));
+    this.selectedGroupeOnduleurForDetails = groupe;
+    this.selectedOnduleurForDetails = null;
     this.showDetails = true;
     this.cdr.detectChanges();
   }
@@ -469,6 +658,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   closeDetails(): void {
     this.showDetails = false;
     this.selectedOnduleurForDetails = null;
+    this.selectedGroupeOnduleurForDetails = null;
     this.cdr.detectChanges();
   }
 
@@ -490,8 +680,8 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         heure: form.value.heure,
         consommationKwh: form.value.consommationKwh,
         productionKwh: form.value.productionKwh,
-        adresse: form.value.adresse || null,
-        court: form.value.court || null,
+        adresse: form.value.adresse,
+        court: form.value.court,
         communication: form.value.communication,
         modeleOnduleur: form.value.modeleOnduleur,
         type: form.value.type,
@@ -558,13 +748,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
                 box: {
                   id: updatedOnduleur.box?.id || formData.box?.id,
                   code: updatedOnduleur.box?.code || selectedBox?.code || this.onduleurs[index].boxCode || 'N/A'
-                },
-                adresse: updatedOnduleur.adresse || formData.adresse,
-                court: updatedOnduleur.court || formData.court,
-                communication: updatedOnduleur.communication || formData.communication,
-                modeleOnduleur: updatedOnduleur.modeleOnduleur || formData.modeleOnduleur,
-                type: updatedOnduleur.type || formData.type,
-                multiplicateur: updatedOnduleur.multiplicateur || formData.multiplicateur
+                }
               };
               console.log('Updated onduleur in table:', JSON.stringify(this.onduleurs[index], null, 2));
             }
@@ -603,13 +787,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
               box: {
                 id: newOnduleur.box?.id || formData.box?.id,
                 code: newOnduleur.box?.code || selectedBox?.code || 'N/A'
-              },
-              adresse: newOnduleur.adresse || formData.adresse,
-              court: newOnduleur.court || formData.court,
-              communication: newOnduleur.communication || formData.communication,
-              modeleOnduleur: newOnduleur.modeleOnduleur || formData.modeleOnduleur,
-              type: newOnduleur.type || formData.type,
-              multiplicateur: newOnduleur.multiplicateur || formData.multiplicateur
+              }
             });
             this.resetForms();
             this.isLoading = false;

@@ -1,7 +1,7 @@
 <!-- Overlay -->
-<div class="overlay" *ngIf="formVisible || showDetails" (click)="toggleForm(); closeDetails()"></div>
+<div class="overlay" *ngIf="formVisible || showDetails || showGroupDrawer" (click)="closeAllPanels()"></div>
 
-<!-- Drawer -->
+<!-- Drawer for Onduleur Form -->
 <div class="drawer" [class.open]="formVisible">
   <div class="p-6">
     <h3 class="text-2xl font-bold mb-6 text-gray-800">
@@ -140,7 +140,6 @@
               <mat-select formControlName="communication" required>
                 <mat-option value="modbus TCP">Modbus TCP</mat-option>
                 <mat-option value="modbus RTU">Modbus RTU</mat-option>
-                <!-- Add more options as needed -->
               </mat-select>
               <mat-error *ngIf="onduleurForm.get('communication')?.hasError('required')">
                 La communication est requise
@@ -189,7 +188,7 @@
                 Fermer
               </button>
               <button mat-flat-button color="primary" type="submit" class="debug-button" [disabled]="!onduleurForm.valid">
-                Modifier
+                {{ isEditMode ? 'Modifier' : 'Envoyer' }}
               </button>
             </div>
           </form>
@@ -352,7 +351,6 @@
           <mat-select formControlName="communication" required>
             <mat-option value="modbus TCP">Modbus TCP</mat-option>
             <mat-option value="modbus RTU">Modbus RTU</mat-option>
-            <!-- Add more options as needed -->
           </mat-select>
           <mat-error *ngIf="onduleurForm.get('communication')?.hasError('required')">
             La communication est requise
@@ -413,14 +411,70 @@
   </div>
 </div>
 
-<!-- Card with Table -->
+<!-- Drawer for Groupe Onduleur Cards -->
+<div class="drawer" [class.open]="showGroupDrawer">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-2xl font-bold text-gray-800">Gérer les Groupes Onduleurs</h3>
+      <button mat-flat-button color="primary" class="debug-button" (click)="openGroupFormDialog()">
+        Ajouter un Groupe
+      </button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoadingGroups">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="groupErrorMessage && !isLoadingGroups">{{ groupErrorMessage }}</div>
+
+    <!-- Groupe Onduleur Cards -->
+    <div class="group-cards" *ngIf="!isLoadingGroups && groupeOnduleurs.length">
+      <div class="group-card" *ngFor="let groupe of groupeOnduleurs">
+        <div class="card-header">
+          <span class="card-title">{{ groupe.code || 'N/A' }}</span>
+        </div>
+        <div class="card-body">
+          <p><strong>Description :</strong> {{ groupe.description || 'N/A' }}</p>
+          <p><strong>Opération :</strong> {{ groupe.operation || 'N/A' }}</p>
+          <p><strong>Site :</strong> {{ groupe.site?.name || 'N/A' }}</p>
+          <p><strong>Bloqué :</strong> {{ groupe.bloque ? 'Oui' : 'Non' }}</p>
+        </div>
+        <div class="card-actions">
+          <button mat-icon-button class="debug-button" (click)="editGroup(groupe)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" class="debug-button" (click)="deleteGroup(groupe.id, $event)">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button mat-icon-button class="debug-button info-button" (click)="showGroupeOnduleurDetails(groupe)">
+            <mat-icon>info</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoadingGroups && !groupeOnduleurs.length && !groupErrorMessage" class="text-center p-4">
+      Aucun groupe onduleur disponible
+    </div>
+  </div>
+</div>
+
+<!-- Card with Onduleur Table -->
 <div class="card-container">
   <div class="card">
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-2xl font-bold text-gray-800">Liste des onduleurs</h3>
-      <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
-        {{ formVisible ? 'Annuler' : 'Ajouter un Onduleur' }}
-      </button>
+      <div class="flex gap-4">
+        <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
+          {{ formVisible ? 'Annuler' : 'Ajouter un Onduleur' }}
+        </button>
+        <button mat-flat-button color="accent" class="debug-button" (click)="toggleGroupDrawer()">
+          Gérer les groupes
+        </button>
+      </div>
     </div>
 
     <!-- Loading Spinner -->
@@ -449,10 +503,10 @@
         <tr *ngFor="let onduleur of onduleurs" class="hover-row">
           <td (click)="editOnduleur(onduleur)">{{ onduleur.code }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.description }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.site.name }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.locale.name }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.box.code }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.modeleOnduleur }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.site?.name || 'N/A' }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.locale?.name || 'N/A' }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.box?.code || 'N/A' }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.modeleOnduleur || 'N/A' }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.bloque ? 'Oui' : 'Non' }}</td>
           <td>
             <button mat-icon-button color="warn" class="debug-button" (click)="deleteOnduleur(onduleur.id, $event)">
@@ -476,25 +530,54 @@
 <!-- Details Panel -->
 <div class="details-panel" *ngIf="showDetails">
   <button class="close-button" (click)="closeDetails()">×</button>
-  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails de l'Onduleur</h3>
+  <h3 class="text-2xl font-bold mb-4 text-gray-800">
+    Détails {{ selectedOnduleurForDetails ? 'de l\'Onduleur' : 'du Groupe Onduleur' }}
+  </h3>
   <div class="space-y-4">
     <h4 class="text-lg font-semibold">Informations Générales</h4>
-    <p><strong>Code :</strong> {{ selectedOnduleurForDetails?.code || 'N/A' }}</p>
-    <p><strong>Description :</strong> {{ selectedOnduleurForDetails?.description || 'N/A' }}</p>
-    <p><strong>Site :</strong> {{ selectedOnduleurForDetails?.site?.name || 'N/A' }}</p>
-    <p><strong>Locale :</strong> {{ selectedOnduleurForDetails?.locale?.name || 'N/A' }}</p>
-    <p><strong>Box :</strong> {{ selectedOnduleurForDetails?.box?.code || 'N/A' }}</p>
-    <p><strong>Index :</strong> {{ selectedOnduleurForDetails?.index || 'N/A' }}</p>
-    <p><strong>Date de Création :</strong> {{ selectedOnduleurForDetails?.dateCreation | date:'shortDate' || 'N/A' }}</p>
-    <p><strong>Heure :</strong> {{ selectedOnduleurForDetails?.heure || 'N/A' }}</p>
-    <p><strong>Consommation (kWh) :</strong> {{ selectedOnduleurForDetails?.consommationKwh || 'N/A' }}</p>
-    <p><strong>Production (kWh) :</strong> {{ selectedOnduleurForDetails?.productionKwh || 'N/A' }}</p>
-    <p><strong>Adresse IP :</strong> {{ selectedOnduleurForDetails?.adresse || 'N/A' }}</p>
-    <p><strong>Court :</strong> {{ selectedOnduleurForDetails?.court || 'N/A' }}</p>
-    <p><strong>Communication :</strong> {{ selectedOnduleurForDetails?.communication || 'N/A' }}</p>
-    <p><strong>Modèle Onduleur :</strong> {{ selectedOnduleurForDetails?.modeleOnduleur || 'N/A' }}</p>
-    <p><strong>Type :</strong> {{ selectedOnduleurForDetails?.type || 'N/A' }}</p>
-    <p><strong>Multiplicateur :</strong> {{ selectedOnduleurForDetails?.multiplicateur || 'N/A' }}</p>
-    <p><strong>Bloqué :</strong> {{ selectedOnduleurForDetails?.bloque ? 'Oui' : 'Non' }}</p>
+    <ng-container *ngIf="selectedOnduleurForDetails; else groupeDetails">
+      <p><strong>Code :</strong> {{ selectedOnduleurForDetails?.code || 'N/A' }}</p>
+      <p><strong>Description :</strong> {{ selectedOnduleurForDetails?.description || 'N/A' }}</p>
+      <p><strong>Site :</strong> {{ selectedOnduleurForDetails?.site?.name || 'N/A' }}</p>
+      <p><strong>Locale :</strong> {{ selectedOnduleurForDetails?.locale?.name || 'N/A' }}</p>
+      <p><strong>Box :</strong> {{ selectedOnduleurForDetails?.box?.code || 'N/A' }}</p>
+      <p><strong>Index :</strong> {{ selectedOnduleurForDetails?.index || 'N/A' }}</p>
+      <p><strong>Date de Création :</strong> {{ selectedOnduleurForDetails?.dateCreation | date:'shortDate' || 'N/A' }}</p>
+      <p><strong>Heure :</strong> {{ selectedOnduleurForDetails?.heure || 'N/A' }}</p>
+      <p><strong>Consommation (kWh) :</strong> {{ selectedOnduleurForDetails?.consommationKwh || 'N/A' }}</p>
+      <p><strong>Production (kWh) :</strong> {{ selectedOnduleurForDetails?.productionKwh || 'N/A' }}</p>
+      <p><strong>Adresse IP :</strong> {{ selectedOnduleurForDetails?.adresse || 'N/A' }}</p>
+      <p><strong>Court :</strong> {{ selectedOnduleurForDetails?.court || 'N/A' }}</p>
+      <p><strong>Communication :</strong> {{ selectedOnduleurForDetails?.communication || 'N/A' }}</p>
+      <p><strong>Modèle Onduleur :</strong> {{ selectedOnduleurForDetails?.modeleOnduleur || 'N/A' }}</p>
+      <p><strong>Type :</strong> {{ selectedOnduleurForDetails?.type || 'N/A' }}</p>
+      <p><strong>Multiplicateur :</strong> {{ selectedOnduleurForDetails?.multiplicateur || 'N/A' }}</p>
+      <p><strong>Bloqué :</strong> {{ selectedOnduleurForDetails?.bloque ? 'Oui' : 'Non' }}</p>
+    </ng-container>
+    <ng-template #groupeDetails>
+      <p><strong>Code :</strong> {{ selectedGroupeOnduleurForDetails?.code || 'N/A' }}</p>
+      <p><strong>Description :</strong> {{ selectedGroupeOnduleurForDetails?.description || 'N/A' }}</p>
+      <p><strong>Opération :</strong> {{ selectedGroupeOnduleurForDetails?.operation || 'N/A' }}</p>
+      <p><strong>Site :</strong> {{ selectedGroupeOnduleurForDetails?.site?.name || 'N/A' }}</p>
+      <p><strong>Bloqué :</strong> {{ selectedGroupeOnduleurForDetails?.bloque ? 'Oui' : 'Non' }}</p>
+      <h4 class="text-lg font-semibold">Liste des Onduleurs</h4>
+      <div *ngIf="selectedGroupeOnduleurForDetails?.onduleurs?.length; else noOnduleurs" class="onduleur-cards">
+        <div *ngFor="let onduleur of selectedGroupeOnduleurForDetails.onduleurs" class="onduleur-card">
+          <div class="card-header">
+            <span class="card-title">{{ onduleur.code || 'N/A' }}</span>
+          </div>
+          <div class="card-body">
+            <p><strong>Description :</strong> {{ onduleur.description || 'N/A' }}</p>
+            <p><strong>Boîtier :</strong> {{ onduleur.box?.code || 'N/A' }}</p>
+            <p><strong>Consommation (kWh) :</strong> {{ onduleur.consommationKwh || 'N/A' }}</p>
+            <p><strong>Production (kWh) :</strong> {{ onduleur.productionKwh || 'N/A' }}</p>
+            <p><strong>Bloqué :</strong> {{ onduleur.bloque ? 'Oui' : 'Non' }}</p>
+          </div>
+        </div>
+      </div>
+      <ng-template #noOnduleurs>
+        <p class="text-gray-500">Aucun onduleur associé à ce groupe.</p>
+      </ng-template>
+    </ng-template>
   </div>
 </div>
