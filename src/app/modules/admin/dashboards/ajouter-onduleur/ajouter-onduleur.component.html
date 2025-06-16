@@ -39,26 +39,6 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Site</mat-label>
-              <mat-select formControlName="siteId">
-                <mat-option *ngFor="let site of sites" [value]="site.id">
-                  {{ site.name }}
-                </mat-option>
-                <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Locale</mat-label>
-              <mat-select formControlName="localeId">
-                <mat-option *ngFor="let locale of locales" [value]="locale.id">
-                  {{ locale.name }}
-                </mat-option>
-                <mat-option *ngIf="!locales.length" disabled>Aucun locale disponible</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
               <mat-label>Box</mat-label>
               <mat-select formControlName="boxId">
                 <mat-option *ngFor="let box of boxes" [value]="box.id">
@@ -149,8 +129,8 @@
             <mat-form-field appearance="outline">
               <mat-label>Modèle Onduleur</mat-label>
               <mat-select formControlName="modeleOnduleur" required>
-                <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele">
-                  {{ modele }}
+                <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele.value">
+                  {{ modele.label }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="onduleurForm.get('modeleOnduleur')?.hasError('required')">
@@ -161,8 +141,8 @@
             <mat-form-field appearance="outline">
               <mat-label>Type</mat-label>
               <mat-select formControlName="type" required>
-                <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type">
-                  {{ type }}
+                <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type.value">
+                  {{ type.label }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="onduleurForm.get('type')?.hasError('required')">
@@ -247,26 +227,6 @@
           <mat-error *ngIf="onduleurForm.get('description')?.hasError('required')">
             La description est requise
           </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Site</mat-label>
-          <mat-select formControlName="siteId">
-            <mat-option *ngFor="let site of sites" [value]="site.id">
-              {{ site.name }}
-            </mat-option>
-            <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Locale</mat-label>
-          <mat-select formControlName="localeId">
-            <mat-option *ngFor="let locale of locales" [value]="locale.id">
-              {{ locale.name }}
-            </mat-option>
-            <mat-option *ngIf="!locales.length" disabled>Aucun locale disponible</mat-option>
-          </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -360,8 +320,8 @@
         <mat-form-field appearance="outline">
           <mat-label>Modèle Onduleur</mat-label>
           <mat-select formControlName="modeleOnduleur" required>
-            <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele">
-              {{ modele }}
+            <mat-option *ngFor="let modele of modeleOnduleurOptions" [value]="modele.value">
+              {{ modele.label }}
             </mat-option>
           </mat-select>
           <mat-error *ngIf="onduleurForm.get('modeleOnduleur')?.hasError('required')">
@@ -372,8 +332,8 @@
         <mat-form-field appearance="outline">
           <mat-label>Type</mat-label>
           <mat-select formControlName="type" required>
-            <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type">
-              {{ type }}
+            <mat-option *ngFor="let type of typeOnduleurOptions" [value]="type.value">
+              {{ type.label }}
             </mat-option>
           </mat-select>
           <mat-error *ngIf="onduleurForm.get('type')?.hasError('required')">
@@ -421,6 +381,14 @@
       </button>
     </div>
 
+    <!-- Search Input for Groups -->
+    <div class="search-input-group">
+      <mat-form-field appearance="outline" class="w-full mb-4">
+        <mat-label>Rechercher un groupe</mat-label>
+        <input matInput type="text" [(ngModel)]="groupSearchTerm" (ngModelChange)="filterGroups()" placeholder="Rechercher par code ou description" />
+      </mat-form-field>
+    </div>
+
     <!-- Loading Spinner -->
     <div class="loading-spinner" *ngIf="isLoadingGroups">
       <mat-spinner diameter="50"></mat-spinner>
@@ -430,8 +398,8 @@
     <div class="error-message" *ngIf="groupErrorMessage && !isLoadingGroups">{{ groupErrorMessage }}</div>
 
     <!-- Groupe Onduleur Cards -->
-    <div class="group-cards" *ngIf="!isLoadingGroups && groupeOnduleurs.length">
-      <div class="group-card" *ngFor="let groupe of groupeOnduleurs">
+    <div class="group-cards" *ngIf="!isLoadingGroups && filteredGroupeOnduleurs.length">
+      <div class="group-card" *ngFor="let groupe of filteredGroupeOnduleurs">
         <div class="card-header">
           <span class="card-title">{{ groupe.code || 'N/A' }}</span>
         </div>
@@ -456,7 +424,7 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoadingGroups && !groupeOnduleurs.length && !groupErrorMessage" class="text-center p-4">
+    <div *ngIf="!isLoadingGroups && !filteredGroupeOnduleurs.length && !groupErrorMessage" class="text-center p-4">
       Aucun groupe onduleur disponible
     </div>
   </div>
@@ -467,13 +435,22 @@
   <div class="card">
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-2xl font-bold text-gray-800">Liste des onduleurs</h3>
-      <div class="flex gap-4">
-        <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
-          {{ formVisible ? 'Annuler' : 'Ajouter un Onduleur' }}
-        </button>
-        <button mat-flat-button color="accent" class="debug-button" (click)="toggleGroupDrawer()">
-          Gérer les groupes
-        </button>
+      <div class="flex gap-4 items-center">
+        <div class="search-input-onduleur">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Rechercher un onduleur</mat-label>
+            <input matInput type="text" [(ngModel)]="onduleurSearchTerm" (ngModelChange)="filterOnduleurs()" placeholder="Rechercher..." />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="flex gap-4">
+          <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
+            {{ formVisible ? 'Annuler' : 'Ajouter un Onduleur' }}
+          </button>
+          <button mat-flat-button color="accent" class="debug-button" (click)="toggleGroupDrawer()">
+            Gérer les groupes
+          </button>
+        </div>
       </div>
     </div>
 
@@ -486,27 +463,25 @@
     <div class="error-message" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</div>
 
     <!-- Table -->
-    <table class="styled-table" *ngIf="!isLoading && onduleurs.length">
+    <table class="styled-table" *ngIf="!isLoading && filteredOnduleurs.length">
       <thead>
         <tr>
           <th>Code</th>
           <th>Description</th>
-          <th>Site</th>
-          <th>Locale</th>
           <th>Box</th>
           <th>Modèle</th>
+          <th>Type</th>
           <th>Bloqué</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let onduleur of onduleurs" class="hover-row">
+        <tr *ngFor="let onduleur of filteredOnduleurs" class="hover-row">
           <td (click)="editOnduleur(onduleur)">{{ onduleur.code }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.description }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.site?.name || 'N/A' }}</td>
-          <td (click)="editOnduleur(onduleur)">{{ onduleur.locale?.name || 'N/A' }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.box?.code || 'N/A' }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.modeleOnduleur || 'N/A' }}</td>
+          <td (click)="editOnduleur(onduleur)">{{ onduleur.type || 'N/A' }}</td>
           <td (click)="editOnduleur(onduleur)">{{ onduleur.bloque ? 'Oui' : 'Non' }}</td>
           <td>
             <button mat-icon-button color="warn" class="debug-button" (click)="deleteOnduleur(onduleur.id, $event)">
@@ -521,7 +496,7 @@
     </table>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoading && !onduleurs.length && !errorMessage" class="text-center p-4">
+    <div *ngIf="!isLoading && !filteredOnduleurs.length && !errorMessage" class="text-center p-4">
       Aucun onduleur disponible
     </div>
   </div>
@@ -538,8 +513,6 @@
     <ng-container *ngIf="selectedOnduleurForDetails; else groupeDetails">
       <p><strong>Code :</strong> {{ selectedOnduleurForDetails?.code || 'N/A' }}</p>
       <p><strong>Description :</strong> {{ selectedOnduleurForDetails?.description || 'N/A' }}</p>
-      <p><strong>Site :</strong> {{ selectedOnduleurForDetails?.site?.name || 'N/A' }}</p>
-      <p><strong>Locale :</strong> {{ selectedOnduleurForDetails?.locale?.name || 'N/A' }}</p>
       <p><strong>Box :</strong> {{ selectedOnduleurForDetails?.box?.code || 'N/A' }}</p>
       <p><strong>Index :</strong> {{ selectedOnduleurForDetails?.index || 'N/A' }}</p>
       <p><strong>Date de Création :</strong> {{ selectedOnduleurForDetails?.dateCreation | date:'shortDate' || 'N/A' }}</p>

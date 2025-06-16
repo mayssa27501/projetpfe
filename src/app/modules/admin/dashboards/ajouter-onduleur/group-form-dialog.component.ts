@@ -46,7 +46,10 @@ import { GroupeOnduleurService } from '../ajouter-groupe-onduleur/groupe-onduleu
 
           <mat-form-field appearance="outline">
             <mat-label>Opération</mat-label>
-            <input matInput type="text" formControlName="operation" />
+            <mat-select formControlName="operation">
+              <mat-option value="Somme">Somme</mat-option>
+              <mat-option value="Moyenne">Moyenne</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -127,7 +130,7 @@ import { GroupeOnduleurService } from '../ajouter-groupe-onduleur/groupe-onduleu
     MatCheckboxModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatDialogModule // Add MatDialogModule here
+    MatDialogModule
   ]
 })
 export class GroupFormDialogComponent {
@@ -174,13 +177,12 @@ export class GroupFormDialogComponent {
         operation: this.groupeOnduleurForm.value.operation,
         site: this.groupeOnduleurForm.value.siteId ? { id: this.groupeOnduleurForm.value.siteId } : null,
         bloque: this.groupeOnduleurForm.value.bloque,
-        onduleurIds: this.groupeOnduleurForm.value.onduleurIds // Modified to match backend expectation
+        onduleurIds: this.groupeOnduleurForm.value.onduleurIds
       };
 
       console.log('Submitting group form with data:', JSON.stringify(formData, null, 2));
 
       if (this.data.isEditMode && formData.id) {
-        // Update existing group
         this.groupeOnduleurService.updateGroupeOnduleur(formData.id, formData).subscribe({
           next: (updatedGroup) => {
             console.log('Group updated successfully:', updatedGroup);
@@ -196,7 +198,6 @@ export class GroupFormDialogComponent {
           }
         });
       } else {
-        // Add new group
         this.groupeOnduleurService.ajouterGroupeOnduleur(formData).subscribe({
           next: (newGroup) => {
             console.log('Group added successfully:', newGroup);

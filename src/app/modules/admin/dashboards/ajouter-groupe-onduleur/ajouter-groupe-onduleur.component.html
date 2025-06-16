@@ -40,7 +40,10 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Opération</mat-label>
-              <input matInput type="text" formControlName="operation" />
+              <mat-select formControlName="operation">
+                <mat-option value="Somme">Somme</mat-option>
+                <mat-option value="Moyenne">Moyenne</mat-option>
+              </mat-select>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -133,7 +136,10 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Opération</mat-label>
-          <input matInput type="text" formControlName="operation" />
+          <mat-select formControlName="operation">
+            <mat-option value="Somme">Somme</mat-option>
+            <mat-option value="Moyenne">Moyenne</mat-option>
+          </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">

@@ -1,6 +1,6 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,16 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AjouterOnduleurService } from './ajouter-onduleur.service';
 import { GroupeOnduleurService } from '../ajouter-groupe-onduleur/groupe-onduleur.service';
 import { GroupFormDialogComponent } from './group-form-dialog.component';
+
+// Enum definition for ModeleOnduleur
+enum ModeleOnduleur {
+  UNO_DM_5_0 = 'UNO_DM_5_0',
+}
+
+// Enum definition for TypeOnduleur
+enum TypeOnduleur {
+  ONDULEUR_SOLAIRE = 'ONDULEUR_SOLAIRE',
+}
 
 @Component({
   selector: 'app-ajouter-onduleur',
@@ -114,6 +124,31 @@ import { GroupFormDialogComponent } from './group-form-dialog.component';
     }
     mat-form-field:focus-within {
       transform: translateY(-2px);
+    }
+    .search-input-onduleur .search-field mat-form-field {
+      width: 12rem;
+    }
+    .search-input-group mat-form-field {
+      width: 100%;
+    }
+    .search-field .mat-form-field-outline {
+      border-radius: 12px !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .search-field .mat-form-field-infix {
+      padding: 0.5rem 0.75rem !important;
+      font-size: 0.95rem !important;
+    }
+    .search-field input {
+      padding: 0.25rem 0.5rem !important;
+      color: #374151;
+    }
+    .search-field input::placeholder {
+      color: #9ca3af;
+      font-style: italic;
+    }
+    .search-field .mat-icon {
+      color: #6b7280;
     }
     button[mat-flat-button],
     button[mat-stroked-button] {
@@ -294,6 +329,7 @@ import { GroupFormDialogComponent } from './group-form-dialog.component';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -311,10 +347,14 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   onduleurForm: FormGroup;
   basicInfoForm: FormGroup;
   onduleurs: any[] = [];
+  filteredOnduleurs: any[] = [];
+  onduleurSearchTerm: string = '';
   sites: any[] = [];
   locales: any[] = [];
   boxes: any[] = [];
   groupeOnduleurs: any[] = [];
+  filteredGroupeOnduleurs: any[] = [];
+  groupSearchTerm: string = '';
   formVisible: boolean = false;
   showGroupDrawer: boolean = false;
   selectedOnduleurId: number | null = null;
@@ -326,8 +366,16 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
   showDetails: boolean = false;
   selectedOnduleurForDetails: any = null;
   selectedGroupeOnduleurForDetails: any = null;
-  modeleOnduleurOptions: string[] = ['Modèle A', 'Modèle B', 'Modèle C']; // Example options
-  typeOnduleurOptions: string[] = ['Type 1', 'Type 2', 'Type 3']; // Example options
+
+  // Single option for ModeleOnduleur
+  modeleOnduleurOptions: { value: ModeleOnduleur; label: string }[] = [
+    { value: ModeleOnduleur.UNO_DM_5_0, label: 'UNO-DM-5.0' },
+  ];
+
+  // Single option for TypeOnduleur
+  typeOnduleurOptions: { value: TypeOnduleur; label: string }[] = [
+    { value: TypeOnduleur.ONDULEUR_SOLAIRE, label: 'Onduleur Solaire' },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -350,8 +398,8 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
       adresse: ['', [Validators.pattern(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/)]],
       court: [''],
       communication: ['', [Validators.required]],
-      modeleOnduleur: ['', [Validators.required]],
-      type: ['', [Validators.required]],
+      modeleOnduleur: [ModeleOnduleur.UNO_DM_5_0, [Validators.required]], // Default to UNO_DM_5_0
+      type: [TypeOnduleur.ONDULEUR_SOLAIRE, [Validators.required]], // Default to ONDULEUR_SOLAIRE
       multiplicateur: ['', [Validators.required, Validators.min(1)]],
       bloque: [false]
     });
@@ -401,6 +449,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
             code: onduleur.boxCode || this.boxes.find(b => b.id === (onduleur.boxId || onduleur.box?.id))?.code || 'N/A'
           }
         }));
+        this.filteredOnduleurs = [...this.onduleurs];
         console.log('Onduleurs loaded:', this.onduleurs);
         console.log('Onduleurs count:', this.onduleurs.length);
         this.isLoading = false;
@@ -484,6 +533,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
             name: groupe.siteName || this.sites.find(s => s.id === (groupe.siteId || groupe.site?.id))?.name || 'N/A'
           }
         }));
+        this.filteredGroupeOnduleurs = [...this.groupeOnduleurs];
         console.log('Groupe onduleurs loaded:', this.groupeOnduleurs);
         console.log('Groupe onduleurs count:', this.groupeOnduleurs.length);
         this.isLoadingGroups = false;
@@ -496,6 +546,34 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  filterOnduleurs(): void {
+    const searchTerm = this.onduleurSearchTerm.toLowerCase().trim();
+    if (!searchTerm) {
+      this.filteredOnduleurs = [...this.onduleurs];
+    } else {
+      this.filteredOnduleurs = this.onduleurs.filter(onduleur =>
+        onduleur.code?.toLowerCase().includes(searchTerm) ||
+        onduleur.description?.toLowerCase().includes(searchTerm)
+      );
+    }
+    console.log('Filtered onduleurs:', this.filteredOnduleurs);
+    this.cdr.detectChanges();
+  }
+
+  filterGroups(): void {
+    const searchTerm = this.groupSearchTerm.toLowerCase().trim();
+    if (!searchTerm) {
+      this.filteredGroupeOnduleurs = [...this.groupeOnduleurs];
+    } else {
+      this.filteredGroupeOnduleurs = this.groupeOnduleurs.filter(groupe =>
+        groupe.code?.toLowerCase().includes(searchTerm) ||
+        groupe.description?.toLowerCase().includes(searchTerm)
+      );
+    }
+    console.log('Filtered groupe onduleurs:', this.filteredGroupeOnduleurs);
+    this.cdr.detectChanges();
   }
 
   toggleForm(): void {
@@ -539,7 +617,6 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         if (groupe) {
-          // Update existing group
           const index = this.groupeOnduleurs.findIndex(g => g.id === result.id);
           if (index !== -1) {
             this.groupeOnduleurs[index] = {
@@ -549,9 +626,9 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
                 name: this.sites.find(s => s.id === result.site?.id)?.name || 'N/A'
               }
             };
+            this.filterGroups();
           }
         } else {
-          // Add new group
           this.groupeOnduleurs.push({
             ...result,
             site: {
@@ -559,6 +636,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
               name: this.sites.find(s => s.id === result.site?.id)?.name || 'N/A'
             }
           });
+          this.filterGroups();
         }
         this.cdr.detectChanges();
       }
@@ -581,8 +659,8 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
       adresse: onduleur.adresse || '',
       court: onduleur.court || '',
       communication: onduleur.communication || '',
-      modeleOnduleur: onduleur.modeleOnduleur || '',
-      type: onduleur.type || '',
+      modeleOnduleur: onduleur.modeleOnduleur || ModeleOnduleur.UNO_DM_5_0, // Default to UNO_DM_5_0
+      type: onduleur.type || TypeOnduleur.ONDULEUR_SOLAIRE, // Default to ONDULEUR_SOLAIRE
       multiplicateur: onduleur.multiplicateur || '',
       bloque: onduleur.bloque || false
     });
@@ -610,6 +688,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     this.ajouterOnduleurService.deleteOnduleur(id).subscribe({
       next: () => {
         this.onduleurs = this.onduleurs.filter(onduleur => onduleur.id !== id);
+        this.filterOnduleurs();
         console.log('Onduleur deleted:', id);
         this.cdr.detectChanges();
       },
@@ -627,6 +706,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
     this.groupeOnduleurService.deleteGroupeOnduleur(id).subscribe({
       next: () => {
         this.groupeOnduleurs = this.groupeOnduleurs.filter(groupe => groupe.id !== id);
+        this.filterGroups();
         console.log('Groupe onduleur deleted:', id);
         this.cdr.detectChanges();
       },
@@ -683,8 +763,8 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
         adresse: form.value.adresse,
         court: form.value.court,
         communication: form.value.communication,
-        modeleOnduleur: form.value.modeleOnduleur,
-        type: form.value.type,
+        modeleOnduleur: form.value.modeleOnduleur, // Will be UNO_DM_5_0
+        type: form.value.type, // Will be ONDULEUR_SOLAIRE
         multiplicateur: form.value.multiplicateur,
         bloque: form.value.bloque
       };
@@ -750,6 +830,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
                   code: updatedOnduleur.box?.code || selectedBox?.code || this.onduleurs[index].boxCode || 'N/A'
                 }
               };
+              this.filterOnduleurs();
               console.log('Updated onduleur in table:', JSON.stringify(this.onduleurs[index], null, 2));
             }
             this.resetForms();
@@ -789,6 +870,7 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
                 code: newOnduleur.box?.code || selectedBox?.code || 'N/A'
               }
             });
+            this.filterOnduleurs();
             this.resetForms();
             this.isLoading = false;
             this.cdr.detectChanges();
@@ -828,8 +910,8 @@ export class AjouterOnduleurComponent implements OnInit, AfterViewInit {
       adresse: '',
       court: '',
       communication: '',
-      modeleOnduleur: '',
-      type: '',
+      modeleOnduleur: ModeleOnduleur.UNO_DM_5_0, // Reset to default
+      type: TypeOnduleur.ONDULEUR_SOLAIRE, // Reset to default
       multiplicateur: '',
       bloque: false
     });
