@@ -105,7 +105,12 @@ export const appRoutes: Route[] = [
             path: 'ajouterlocale',
             loadChildren: () =>
                 import('app/modules/admin/dashboards/ajouter-locale/ajouter-locale.routes').then(m => m.AJOUTERLOCALE_ROUTES)
-}
+},
+                {
+                    path: 'ajoutersociete',
+                    loadChildren: () =>
+                      import('app/modules/admin/dashboards/ajouter-societe/ajouter-societe.routes').then(m => m.AJOUTERSOCIETE_ROUTES)
+                }
             ]},
 
             // Apps
