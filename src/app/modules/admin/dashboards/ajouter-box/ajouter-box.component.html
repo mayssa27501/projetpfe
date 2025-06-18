@@ -240,6 +240,7 @@
           <th>Description</th>
           <th>Serial N°</th>
           <th>Modèle</th>
+          <th>Locale</th>
           <th>Bloqué</th>
           <th>Actions</th>
         </tr>
@@ -250,6 +251,7 @@
           <td (click)="editBox(box)">{{ box.description }}</td>
           <td (click)="editBox(box)">{{ box.serialNumber }}</td>
           <td (click)="editBox(box)">{{ box.modele.name }}</td>
+          <td (click)="editBox(box)">{{ box.localeName || 'Non affecté' }}</td>
           <td (click)="editBox(box)">{{ box.isBlocked ? 'Oui' : 'Non' }}</td>
           <td>
             <button mat-icon-button color="warn" class="debug-button" (click)="deleteBox(box.id, $event)">
@@ -257,6 +259,9 @@
             </button>
             <button mat-icon-button class="debug-button info-button" (click)="showBoxDetails(box); $event.stopPropagation()">
               <mat-icon>info</mat-icon>
+            </button>
+            <button mat-icon-button class="debug-button assign-button" (click)="openAssignLocaleDialog(box); $event.stopPropagation()">
+              <mat-icon>link</mat-icon>
             </button>
           </td>
         </tr>
@@ -280,6 +285,7 @@
     <p><strong>Description :</strong> {{ selectedBoxForDetails?.description || 'N/A' }}</p>
     <p><strong>Numéro de Série :</strong> {{ selectedBoxForDetails?.serialNumber || 'N/A' }}</p>
     <p><strong>Modèle :</strong> {{ selectedBoxForDetails?.modele?.name || 'N/A' }}</p>
+    <p><strong>Locale :</strong> {{ selectedBoxForDetails?.localeName || 'Non affecté' }}</p>
     <p><strong>Bloqué :</strong> {{ selectedBoxForDetails?.isBlocked ? 'Oui' : 'Non' }}</p>
 
     <h4 class="text-lg font-semibold mt-4">Configuration Matérielle</h4>

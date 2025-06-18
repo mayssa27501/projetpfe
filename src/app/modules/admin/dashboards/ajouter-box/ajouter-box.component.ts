@@ -9,7 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AjouterBoxService } from './ajouter-box.service';
+import { AssignLocaleDialogComponent } from './assign-locale-dialog.component';
 
 @Component({
   selector: 'app-ajouter-box',
@@ -146,11 +148,17 @@ import { AjouterBoxService } from './ajouter-box.service';
     button[mat-icon-button].debug-button.info-button {
       color: #3b82f6 !important;
     }
+    button[mat-icon-button].debug-button.assign-button {
+      color: #10b981 !important;
+    }
     button[mat-icon-button].debug-button:hover {
       background: #fee2e2 !important;
     }
     button[mat-icon-button].info-button:hover {
       background: #dbeafe !important;
+    }
+    button[mat-icon-button].assign-button:hover {
+      background: #d1fae5 !important;
     }
     button[mat-flat-button][color="primary"],
     button[mat-stroked-button][color="primary"],
@@ -226,7 +234,8 @@ import { AjouterBoxService } from './ajouter-box.service';
     MatIconModule,
     MatTabsModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ]
 })
 export class AjouterBoxComponent implements OnInit, AfterViewInit {
@@ -235,6 +244,7 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
   hardwareConfigForm: FormGroup;
   boxes: any[] = [];
   modeles: any[] = [];
+  locales: any[] = [];
   formVisible: boolean = false;
   selectedBoxId: number | null = null;
   isEditMode: boolean = false;
@@ -247,7 +257,8 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private ajouterBoxService: AjouterBoxService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     console.log('AjouterBoxComponent initialized');
     this.boxForm = this.fb.group({
@@ -270,6 +281,7 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     console.log('ngOnInit called');
     this.loadModeles();
+    this.loadLocales();
     this.boxForm.get('modeleId')?.valueChanges.subscribe((modeleId) => {
       if (this.isEditMode && modeleId) {
         console.log('Modele ID changed:', modeleId);
@@ -304,9 +316,11 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
             name: box.modeleName || this.modeles.find(m => m.id === (box.modeleId || box.modele?.id))?.name || 'N/A',
             attributes: box.modeleAttributes || {}
           },
-          modeleAttributes: box.modeleAttributes || {}
+          modeleAttributes: box.modeleAttributes || {},
+          localeId: box.localeId || null,
+          localeName: box.localeName || this.locales.find(l => l.id === box.localeId)?.name || 'Non affecté'
         }));
-        console.log('Boxes loaded:', this.boxes);
+        console.log('Boxes loaded:', JSON.stringify(this.boxes, null, 2));
         console.log('Boxes count:', this.boxes.length);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -336,6 +350,27 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
         this.modeles = [];
         this.isLoading = false;
         this.loadBoxes();
+      }
+    });
+  }
+
+  loadLocales(): void {
+    this.isLoading = true;
+    console.log('Loading locales...');
+    this.ajouterBoxService.getLocales().subscribe({
+      next: (data) => {
+        this.locales = data;
+        console.log('Locales loaded:', data);
+        console.log('Locales count:', this.locales.length);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading locales:', err);
+        this.errorMessage = 'Échec du chargement des locales: ' + (err.message || 'Erreur inconnue');
+        this.locales = [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -383,6 +418,72 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
         }
         console.log('HardwareConfigForm after error:', this.hardwareConfigForm.value);
         console.log('HardwareConfigForm valid:', this.hardwareConfigForm.valid);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  openAssignLocaleDialog(box: any): void {
+    console.log('Opening assign locale dialog for box:', box.id);
+    const dialogRef = this.dialog.open(AssignLocaleDialogComponent, {
+      width: '400px',
+      data: { boxId: box.id, locales: this.locales, currentLocaleId: box.localeId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.localeId) {
+        console.log('Assigning locale:', result.localeId, 'to box:', box.id);
+        this.assignBoxToLocale(box.id, result.localeId);
+      } else {
+        console.log('Dialog closed without selection');
+      }
+    });
+  }
+
+  assignBoxToLocale(boxId: number, localeId: number): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    const box = this.boxes.find(b => b.id === boxId);
+    if (!box) {
+      this.errorMessage = 'Box non trouvée';
+      this.isLoading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const formData = {
+      ...box,
+      locale: { id: localeId },
+      modele: { id: box.modele?.id || box.modeleId },
+      modeleAttributes: box.modeleAttributes || {}
+    };
+
+    console.log('Assigning box to locale with data:', JSON.stringify(formData, null, 2));
+    this.ajouterBoxService.updateBox(boxId, formData).subscribe({
+      next: (updatedBox) => {
+        console.log('Box updated with locale:', JSON.stringify(updatedBox, null, 2));
+        const index = this.boxes.findIndex(b => b.id === boxId);
+        if (index !== -1) {
+          this.boxes[index] = {
+            ...this.boxes[index],
+            localeId: updatedBox.localeId || localeId,
+            localeName: this.locales.find(l => l.id === (updatedBox.localeId || localeId))?.name || 'Non affecté'
+          };
+          console.log('Updated box in frontend:', JSON.stringify(this.boxes[index], null, 2));
+        }
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error assigning locale to box:', err);
+        let errorMessage = 'Échec de l\'affectation du locale: ';
+        if (err.status === 0) {
+          errorMessage += 'Problème de CORS ou serveur inaccessible. Vérifiez que le backend est en cours d\'exécution sur http://localhost:8080 et que CORS est configuré pour http://localhost:4200.';
+        } else {
+          errorMessage += `HTTP ${err.status} - ${err.message || 'Erreur inconnue'}`;
+        }
+        this.errorMessage = errorMessage;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -477,7 +578,8 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
         serialNumber: form.value.serialNumber,
         modele: { id: form.value.modeleId },
         isBlocked: form.value.isBlocked,
-        modeleAttributes: attributes
+        modeleAttributes: attributes,
+        locale: this.boxes.find(b => b.id === this.selectedBoxId)?.localeId ? { id: this.boxes.find(b => b.id === this.selectedBoxId)?.localeId } : null
       };
     } else if (formType === 'basic') {
       form = this.basicInfoForm;
@@ -492,7 +594,8 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
         serialNumber: this.boxForm.value.serialNumber || '',
         modele: { id: this.boxForm.value.modeleId || '' },
         isBlocked: form.value.isBlocked,
-        modeleAttributes: attributes
+        modeleAttributes: attributes,
+        locale: this.boxes.find(b => b.id === this.selectedBoxId)?.localeId ? { id: this.boxes.find(b => b.id === this.selectedBoxId)?.localeId } : null
       };
     } else {
       form = this.hardwareConfigForm;
@@ -508,7 +611,8 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
         serialNumber: box?.serialNumber || '',
         modele: { id: box?.modele?.id || box?.modeleId || '' },
         isBlocked: box?.isBlocked || false,
-        modeleAttributes: attributes
+        modeleAttributes: attributes,
+        locale: box?.localeId ? { id: box.localeId } : null
       };
     }
 
@@ -536,7 +640,9 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
                   id: updatedBox.modele?.id || formData.modele.id,
                   name: updatedBox.modele?.name || selectedModele?.name || this.boxes[index].modeleName || 'N/A',
                   attributes: attributes
-                }
+                },
+                localeId: updatedBox.localeId || formData.locale?.id || null,
+                localeName: updatedBox.localeName || this.locales.find(l => l.id === (updatedBox.localeId || formData.locale?.id))?.name || 'Non affecté'
               };
               console.log('Updated box in table:', JSON.stringify(this.boxes[index], null, 2));
             }
@@ -546,7 +652,13 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
           },
           error: (err) => {
             console.error('Error updating box:', err);
-            this.errorMessage = `Échec de la mise à jour de la box: ${err.status ? `HTTP ${err.status} - ` : ''}${err.message || 'Erreur inconnue'}`;
+            let errorMessage = 'Échec de la mise à jour de la box: ';
+            if (err.status === 0) {
+              errorMessage += 'Problème de CORS ou serveur inaccessible. Vérifiez http://localhost:8080.';
+            } else {
+              errorMessage += `HTTP ${err.status} - ${err.message || 'Erreur inconnue'}`;
+            }
+            this.errorMessage = errorMessage;
             this.isLoading = false;
             this.cdr.detectChanges();
           }
@@ -566,7 +678,9 @@ export class AjouterBoxComponent implements OnInit, AfterViewInit {
                 id: newBox.modele?.id || formData.modele.id,
                 name: newBox.modele?.name || selectedModele?.name || 'N/A',
                 attributes: attributes
-              }
+              },
+              localeId: newBox.localeId || formData.locale?.id || null,
+              localeName: newBox.localeName || this.locales.find(l => l.id === (newBox.localeId || formData.locale?.id))?.name || 'Non affecté'
             });
             this.resetForms();
             this.isLoading = false;
