@@ -47,9 +47,8 @@
               <mat-label>Site</mat-label>
               <mat-select formControlName="siteId" required>
                 <mat-option *ngFor="let site of sites" [value]="site.id">
-                  {{ site.description }}
+                  {{ site.code }}
                 </mat-option>
-                <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
               </mat-select>
               <mat-error *ngIf="localeForm.get('siteId')?.hasError('required')">
                 Le site est requis
@@ -133,20 +132,15 @@
           <mat-label>Site</mat-label>
           <mat-select formControlName="siteId" required>
             <mat-option *ngFor="let site of sites" [value]="site.id">
-              {{ site.description }}
+              {{ site.code }}
             </mat-option>
-            <mat-option *ngIf="!sites.length" disabled>Aucun site disponible</mat-option>
           </mat-select>
           <mat-error *ngIf="localeForm.get('siteId')?.hasError('required')">
             Le site est requis
           </mat-error>
         </mat-form-field>
 
-        <mat-checkbox formControlName="blocked">Bloque</mat-checkbox>
-
-        <div class="text-sm text-gray-500 mb-2">
-          Sites chargé: {{ sites.length }}
-        </div>
+        <mat-checkbox formControlName="blocked">Bloqué</mat-checkbox>
 
         <div class="flex justify-end gap-4 mt-6">
           <button mat-stroked-button color="warn" type="button" class="debug-button" (click)="resetForms()">
@@ -165,9 +159,9 @@
 <div class="card-container">
   <div class="card">
     <div class="flex justify-between items-center mb-6">
-      <h3 class="text-2xl font-bold text-gray-800">Liste des locales</h3>
+      <h3 class="text-2xl font-bold text-gray-800">Liste des locaux</h3>
       <button mat-flat-button color="primary" class="debug-button" (click)="toggleForm()">
-        {{ formVisible ? 'Annuler' : 'Ajouter un locale' }}
+        {{ formVisible ? 'Annuler' : 'Ajouter un local' }}
       </button>
     </div>
 
@@ -196,8 +190,8 @@
           <td (click)="editLocale(locale)">{{ locale.code }}</td>
           <td (click)="editLocale(locale)">{{ locale.name }}</td>
           <td (click)="editLocale(locale)">{{ locale.description }}</td>
-          <td (click)="editLocale(locale)">{{ locale.site?.description || 'N/A' }}</td>
-          <td>{{ locale.bloque ? 'Oui' : 'Non' }}</td>
+          <td (click)="editLocale(locale)">{{ locale.siteCode || locale.site?.code || 'Aucun site' }}</td>
+          <td>{{ locale.blocked ? 'Oui' : 'Non' }}</td>
           <td>
             <button mat-icon-button color="warn" class="debug-button" (click)="deleteLocale(locale.id, $event)">
               <mat-icon>delete</mat-icon>
@@ -212,7 +206,7 @@
 
     <!-- Empty State -->
     <div *ngIf="!isLoading && !locales.length && !errorMessage" class="text-center p-4">
-      Aucun locale disponible
+      Aucun local disponible
     </div>
   </div>
 </div>
@@ -220,13 +214,13 @@
 <!-- Details Panel -->
 <div class="details-panel" *ngIf="showDetails">
   <button class="close-button" (click)="closeDetails()">×</button>
-  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails du locale</h3>
+  <h3 class="text-2xl font-bold mb-4 text-gray-800">Détails du local</h3>
   <div class="space-y-4">
     <h4 class="text-lg font-semibold">Informations Générales</h4>
     <p><strong>Code :</strong> {{ selectedLocaleForDetails?.code || 'N/A' }}</p>
     <p><strong>Nom :</strong> {{ selectedLocaleForDetails?.name || 'N/A' }}</p>
     <p><strong>Description :</strong> {{ selectedLocaleForDetails?.description || 'N/A' }}</p>
-    <p><strong>Site :</strong> {{ selectedLocaleForDetails?.site?.description || 'N/A' }}</p>
+    <p><strong>Site :</strong> {{ selectedLocaleForDetails?.siteCode || selectedLocaleForDetails?.site?.code || 'N/A' }}</p>
     <p><strong>Nombre de Boxes :</strong> {{ selectedLocaleForDetails?.boxes?.length || 0 }}</p>
     <p><strong>Bloqué :</strong> {{ selectedLocaleForDetails?.blocked ? 'Oui' : 'Non' }}</p>
   </div>

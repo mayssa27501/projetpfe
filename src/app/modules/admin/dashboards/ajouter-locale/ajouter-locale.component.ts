@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
+import { MatOption, MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -234,7 +234,8 @@ import { AjouterLocaleService } from './ajouter-locale.service';
     MatIconModule,
     MatTabsModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatOption
   ]
 })
 export class AjouterLocaleComponent implements OnInit, AfterViewInit {
@@ -289,16 +290,23 @@ export class AjouterLocaleComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     this.errorMessage = '';
     console.log('Loading locales...');
+    console.log('Sites available:', JSON.stringify(this.sites, null, 2));
     this.ajouterLocaleService.getLocales().subscribe({
       next: (data) => {
-        this.locales = data.map(locale => ({
-          ...locale,
-          site: {
-            id: locale.siteId || locale.site?.id,
-            description: locale.siteDescription || this.sites.find(s => s.id === (locale.siteId || locale.site?.id))?.description || 'N/A'
-          }
-        }));
-        console.log('Locales loaded:', this.locales);
+        console.log('Raw backend response for locales:', JSON.stringify(data, null, 2));
+        this.locales = data.map(locale => {
+          const site = this.sites.find(s => s.id === (locale.siteId || locale.site?.id));
+          return {
+            ...locale,
+            siteId: locale.siteId || locale.site?.id,
+            siteCode: locale.siteCode || site?.code || 'N/A',
+            site: {
+              id: locale.siteId || locale.site?.id,
+              code: locale.siteCode || site?.code || 'N/A'
+            }
+          };
+        });
+        console.log('Mapped locales:', JSON.stringify(this.locales, null, 2));
         console.log('Locales count:', this.locales.length);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -318,7 +326,7 @@ export class AjouterLocaleComponent implements OnInit, AfterViewInit {
     this.ajouterLocaleService.getSites().subscribe({
       next: (data) => {
         this.sites = data;
-        console.log('Sites loaded:', data);
+        console.log('Sites loaded:', JSON.stringify(data, null, 2));
         console.log('Sites count:', this.sites.length);
         this.loadLocales();
       },
@@ -435,10 +443,10 @@ export class AjouterLocaleComponent implements OnInit, AfterViewInit {
               this.locales[index] = {
                 ...updatedLocale,
                 siteId: updatedLocale.site?.id || formData.site?.id,
-                siteDescription: updatedLocale.site?.description || selectedSite?.description || this.locales[index].siteDescription || 'N/A',
+                siteCode: updatedLocale.siteCode || selectedSite?.code || 'N/A',
                 site: {
                   id: updatedLocale.site?.id || formData.site?.id,
-                  description: updatedLocale.site?.description || selectedSite?.description || this.locales[index].siteDescription || 'N/A'
+                  code: updatedLocale.siteCode || selectedSite?.code || 'N/A'
                 }
               };
               console.log('Updated locale in table:', JSON.stringify(this.locales[index], null, 2));
@@ -455,41 +463,42 @@ export class AjouterLocaleComponent implements OnInit, AfterViewInit {
           }
         });
       } else if (formType === 'locale') {
-        console.log('Sending POST request to add locale');
-        this.ajouterLocaleService.ajouterLocale(formData).subscribe({
-          next: (newLocale) => {
-            console.log('Locale added:', JSON.stringify(newLocale, null, 2));
-            this.locales.push({
-              ...newLocale,
-              siteId: newLocale.site?.id || formData.site?.id,
-              siteDescription: newLocale.site?.description || selectedSite?.description || 'N/A',
-              site: {
-                id: newLocale.site?.id || formData.site?.id,
-                description: newLocale.site?.description || selectedSite?.description || 'N/A'
-              }
-            });
-            this.resetForms();
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            console.error('Error adding locale:', err);
-            this.errorMessage = `Échec de l'ajout du local: ${err.status ? `HTTP ${err.status} - ` : ''}${err.message || 'Erreur inconnue'}`;
-            this.isLoading = false;
-            this.cdr.detectChanges();
-          }
-        });
+          console.log('Sending POST request to add locale');
+          this.ajouterLocaleService.ajouterLocale(formData).subscribe({
+            next: (newLocale) => {
+              console.log('Locale added:', JSON.stringify(newLocale, null, 2));
+              this.locales.push({
+                ...newLocale,
+                siteId: newLocale.site?.id || formData.site?.id,
+                siteCode: newLocale.siteCode || selectedSite?.code || 'N/A',
+                site: {
+                  id: newLocale.site?.id || formData.site?.id,
+                  code: newLocale.siteCode || selectedSite?.code || 'N/A'
+                }
+              });
+              console.log('Added locale to table:', JSON.stringify(this.locales[this.locales.length - 1], null, 2));
+              this.resetForms();
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              console.error('Error adding locale:', err);
+              this.errorMessage = `Échec de l'ajout du local: ${err.status ? `HTTP ${err.status} - ` : ''}${err.message || 'Erreur inconnue'}`;
+              this.isLoading = false;
+              this.cdr.detectChanges();
+            }
+          });
+        } else {
+          this.errorMessage = 'L’ajout est uniquement autorisé via le formulaire d’informations générales';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
       } else {
-        this.errorMessage = 'L’ajout est uniquement autorisé via le formulaire d’informations générales';
+        console.warn(`Form ${formType} invalid:`, form.errors);
+        this.errorMessage = `Le formulaire ${formType} est invalide`;
         this.isLoading = false;
         this.cdr.detectChanges();
       }
-    } else {
-      console.warn(`Form ${formType} invalid:`, form.errors);
-      this.errorMessage = `Le formulaire ${formType} est invalide`;
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }
   }
 
   resetForms(): void {
