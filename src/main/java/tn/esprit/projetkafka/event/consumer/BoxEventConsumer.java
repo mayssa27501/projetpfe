@@ -54,6 +54,15 @@ public class BoxEventConsumer {
             boxView.setModeleAttributes(new java.util.HashMap<>());
         }
 
+        // Copy Locale information
+        if (box.getLocale() != null) {
+            boxView.setLocaleId(box.getLocale().getId());
+            boxView.setLocaleName(box.getLocale().getName());
+        } else {
+            boxView.setLocaleId(null);
+            boxView.setLocaleName(null);
+        }
+
         // Fetch OnduleurView entities that reference this Box
         List<OnduleurView> onduleurViews = onduleurViewRepository.findByBoxId(box.getId());
         List<Long> onduleurIds = onduleurViews.stream()

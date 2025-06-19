@@ -1,7 +1,8 @@
 package tn.esprit.projetkafka.query.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
 import tn.esprit.projetkafka.query.entity.SiteView;
 
-public interface SiteViewRepository extends JpaRepository<SiteView, Long> {
+public interface SiteViewRepository extends MongoRepository<SiteView, Long> {
 }

@@ -27,6 +27,7 @@ public class LocaleService {
             existingLocale.setName(updatedLocale.getName());
             existingLocale.setDescription(updatedLocale.getDescription());
             existingLocale.setBlocked(updatedLocale.getBlocked());
+            existingLocale.setSite(updatedLocale.getSite()); // Added site update
             Locale saved = repository.save(existingLocale);
             eventProducer.sendLocaleEvent(saved);
             return saved;
@@ -38,7 +39,6 @@ public class LocaleService {
             throw new RuntimeException("Locale not found with id: " + id);
         }
         repository.deleteById(id);
-        // Envoyer un événement de suppression si nécessaire
         Locale deletedLocale = new Locale();
         deletedLocale.setId(id);
         eventProducer.sendLocaleEvent(deletedLocale);

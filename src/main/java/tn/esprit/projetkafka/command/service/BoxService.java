@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.esprit.projetkafka.command.entity.Box;
 import tn.esprit.projetkafka.command.entity.Modele;
+import tn.esprit.projetkafka.command.entity.Locale; // Add import for Locale
 import tn.esprit.projetkafka.command.repository.BoxRepository;
 import tn.esprit.projetkafka.command.repository.ModeleRepository;
+import tn.esprit.projetkafka.command.repository.LocaleRepository; // Add import for LocaleRepository
 import tn.esprit.projetkafka.event.producer.BoxEventProducer;
 
 @Service
@@ -15,11 +17,13 @@ public class BoxService {
     private static final Logger logger = LoggerFactory.getLogger(BoxService.class);
     private final BoxRepository repository;
     private final ModeleRepository modeleRepository;
+    private final LocaleRepository localeRepository; // Add LocaleRepository
     private final BoxEventProducer eventProducer;
 
-    public BoxService(BoxRepository repository, ModeleRepository modeleRepository, BoxEventProducer eventProducer) {
+    public BoxService(BoxRepository repository, ModeleRepository modeleRepository, LocaleRepository localeRepository, BoxEventProducer eventProducer) {
         this.repository = repository;
         this.modeleRepository = modeleRepository;
+        this.localeRepository = localeRepository; // Initialize LocaleRepository
         this.eventProducer = eventProducer;
     }
 
@@ -35,6 +39,14 @@ public class BoxService {
             box.setModele(fullModele);
         } else {
             logger.warn("No modele provided for box creation");
+        }
+        if (box.getLocale() != null && box.getLocale().getId() != null) {
+            Locale locale = localeRepository.findById(box.getLocale().getId())
+                    .orElseThrow(() -> {
+                        logger.error("Locale not found with ID: {}", box.getLocale().getId());
+                        return new RuntimeException("Locale not found with ID: " + box.getLocale().getId());
+                    });
+            box.setLocale(locale);
         }
         logger.debug("Saving box with modeleAttributes: {}", box.getModeleAttributes());
         Box savedBox = repository.save(box);
@@ -57,6 +69,17 @@ public class BoxService {
             } else {
                 logger.warn("No modele provided for box ID: {}", id);
             }
+            // Update locale if provided
+            if (updatedBox.getLocale() != null && updatedBox.getLocale().getId() != null) {
+                Locale locale = localeRepository.findById(updatedBox.getLocale().getId())
+                        .orElseThrow(() -> {
+                            logger.error("Locale not found with ID: {}", updatedBox.getLocale().getId());
+                            return new RuntimeException("Locale not found with ID: " + updatedBox.getLocale().getId());
+                        });
+                existingBox.setLocale(locale);
+            } else if (updatedBox.getLocale() != null && updatedBox.getLocale().getId() == null) {
+                existingBox.setLocale(null); // Allow clearing the locale
+            }
             existingBox.setCode(updatedBox.getCode());
             existingBox.setSerialNumber(updatedBox.getSerialNumber());
             existingBox.setDescription(updatedBox.getDescription());
@@ -70,7 +93,6 @@ public class BoxService {
                 logger.warn("No modeleAttributes provided for box ID: {}", id);
                 existingBox.getModeleAttributes().clear();
             }
-            // Note: Onduleurs are managed via OnduleurService, so no direct update here
             logger.debug("Saving box with updated modeleAttributes: {}", existingBox.getModeleAttributes());
             Box saved = repository.save(existingBox);
             logger.info("Box updated with ID: {}. Final modeleAttributes: {}", saved.getId(), saved.getModeleAttributes());

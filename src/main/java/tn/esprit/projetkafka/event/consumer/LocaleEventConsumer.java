@@ -29,6 +29,8 @@ public class LocaleEventConsumer {
         localeView.setName(locale.getName());
         localeView.setDescription(locale.getDescription());
         localeView.setBlocked(locale.getBlocked());
+        localeView.setSiteId(locale.getSite() != null ? locale.getSite().getId() : null);
+        localeView.setSiteDescription(locale.getSite() != null ? locale.getSite().getDescription() : null);
 
         try {
             queryRepository.save(localeView);

@@ -23,6 +23,10 @@ public class Locale {
 
     private Boolean blocked;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "site_id")
+    private Site site; // Added relationship to Site
+
     @OneToMany(mappedBy = "locale", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
     @JsonIgnore
     private List<Box> boxes = new ArrayList<>();
@@ -66,6 +70,14 @@ public class Locale {
 
     public void setBlocked(Boolean blocked) {
         this.blocked = blocked;
+    }
+
+    public Site getSite() {
+        return site;
+    }
+
+    public void setSite(Site site) {
+        this.site = site;
     }
 
     public List<Box> getBoxes() {

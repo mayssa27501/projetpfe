@@ -2,6 +2,7 @@ package tn.esprit.projetkafka.command.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,6 +19,10 @@ public class Site {
     private String positionGps;
     private Boolean isBlocked;
     private Boolean isPrincipal;
+
+    @OneToMany(mappedBy = "site", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonIgnore
+    private List<Locale> locales = new ArrayList<>(); // Added relationship to Locale
 
     @OneToMany(mappedBy = "site")
     @JsonIgnore
@@ -78,6 +83,14 @@ public class Site {
 
     public void setIsPrincipal(Boolean isPrincipal) {
         this.isPrincipal = isPrincipal;
+    }
+
+    public List<Locale> getLocales() {
+        return locales;
+    }
+
+    public void setLocales(List<Locale> locales) {
+        this.locales = locales;
     }
 
     public List<GroupeOnduleur> getGroupeOnduleurs() {
